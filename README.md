@@ -54,7 +54,23 @@ flight:
     - one idempotent
     - one non-idempotent
 
+6. create a new thread to serve each request received
 '''
 
 ### Client
-1. provide an interface for users to invoke services
+1. provide an interface that repeatedly asks the user to enter a request and sends the request to the server
+ 
+2. include an option for the user to terminate the client
+
+3. already know the server address and port number
+
+
+### Message
+1. self-design format
+2. transmit in byte array
+ - marshaling (int / float / str)
+ - unmarshalling
+
+ #include <netinet/in.h>
+ uint32_t htonl(uint32_t hostlong);
+ uint32_t ntohl(uint32_t netlong);
