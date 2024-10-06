@@ -1,6 +1,9 @@
 # SC6103_DS
-due 10.16
-next meeting 10.10 (Thu) 
+due 10.16 code + report
+
+next meeting:
+ - 10.10 9:00am
+ - 10.12 after DS class
 
 ## A Distributed Flight Information System
  - CS Architecture
