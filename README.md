@@ -1,11 +1,13 @@
 # SC6103_DS
+due 10.16
+next meeting 10.10 (Thu) 
 
 ## A Distributed Flight Information System
  - CS Architecture
  - UDP sockets
 ![CS Communication Flow](cs-communication-flow.png)
 
-### Server
+### Server - C (gh + ylr)
 
 #### store the information of all flights
 '''
@@ -51,25 +53,24 @@ flight:
 4. callback (server & client): monitor_seat_availability (main pre content)
 
 5. two more operations on the flights through client-server communication:
-    - one idempotent
-    - one non-idempotent
+    - one idempotent 选餐
+    - one non-idempotent VIP休息室+其他各类需求购买
 
 6. create a new thread to serve each request received
 '''
 
-### Client
+### Client - Java (yfh + hsy)
 1. provide an interface that repeatedly asks the user to enter a request and sends the request to the server
  
 2. include an option for the user to terminate the client
 
 3. already know the server address and port number
 
-
-### Message
-1. self-design format
-2. transmit in byte array
- - marshaling (int / float / str)
- - unmarshalling
+4. Message
+    1. self-design format
+    2. transmit in byte array
+        - marshaling (int / float / str)
+        - unmarshalling
 
  #include <netinet/in.h>
  uint32_t htonl(uint32_t hostlong);
