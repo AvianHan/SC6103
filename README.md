@@ -116,6 +116,7 @@ printed on the screen.
 	SELECT * FROM flights;
 ![image](https://github.com/user-attachments/assets/df31c795-4781-4066-a20d-d8b23099c47f)
 
+	gcc -o database_connect F:/ntu/course/6103/SC6103_DS/src/server_c/database_connect.c -IF:/anzhuangbao/Wnmp-4.2.0/mariadb-bins/default/include -LF:/anzhuangbao/Wnmp-4.2.0/mariadb-bins/default/bin -lmariadb
 
 
 
