@@ -13,92 +13,70 @@ public class Client {
     private static Callback callback;
 
     public static void main(String[] args) {
-        // DatagramSocket aSocket = null;
         try {
-        //     aSocket = new DatagramSocket();
-        //     byte[] message = message.getBytes();
-        //     while (true) { // shuangyue
-        //         DatagramPacket request = new DatagramPacket(message, message.length);
-        //         aSocket.receive(request);
-        //         DatagramPacket reply =new DatagramPacket(
-        //             request.getData(), request.getLength(),
-        //             request.getAddress(), request.getPort()
-        //         );
-        //         aSocket.send(reply);
-        //     }  catch (Exception e) {
-        //         e.printStackTrace();
-        //     }
-
-
-            //InetAddress serverAddress = InetAddress.getByName(server_address);
-            //String server_address = server_address;
             InetAddress serverInetAddress = InetAddress.getByName(server_addr);
-            callback = new Callback(serverInetAddress, server_port); // 初始化回调处理器
+            callback = new Callback(serverInetAddress, server_port); // Initialize callback handler
             runClient(serverInetAddress, server_port);
         } catch (Exception e) {
-            e.printStackTrace(); // 打印异常堆栈信息
-            System.out.println("Error initializing UDPClient"); // 输出错误信息
-   
-
+            e.printStackTrace(); // Print exception stack trace
+            System.out.println("Error initializing UDPClient"); // Output error message
         }
-        // if (aSocket != null)
-        //     aSocket.close();
-
     }
 
-     // 运行客户端逻辑
+    // Run client logic
     public static void runClient(InetAddress serverInetAddress, int server_port) {
         try (Scanner scanner = new Scanner(System.in)) {
-            UDPUtils udpUtils = new UDPUtils(); // 初始化 UDP 工具类
+            UDPUtils udpUtils = new UDPUtils(); // Initialize UDP utility class
 
             while (true) {
-                displayMenu(); // 显示用户菜单
+                displayMenu(); // Display user menu
                 int choice = Integer.parseInt(scanner.nextLine());
 
                 switch (choice) {
-                    case 1: // 查询航班id
+                    case 1: // Query flight by source and destination
                         System.out.print("Enter source place: ");
                         String source = scanner.nextLine();
                         System.out.print("Enter destination place: ");
                         String destination = scanner.nextLine();
                         String queryMessage = "QUERY_FLIGHT " + source + " " + destination;
-                        udpUtils.sendMessage(queryMessage, serverInetAddress, server_port); // 发送查询消息
-                        String response = udpUtils.receiveMessage(); // 接收响应消息
+                        udpUtils.sendMessage(queryMessage, serverInetAddress, server_port); // Send query message
+                        String response = udpUtils.receiveMessage(); // Receive response message
                         System.out.println("Server response: " + response);
                         break;
-                    case 2: // 查询航班信息
+                    case 2: // Monitor flight information
                         System.out.print("Enter flight ID to monitor: ");
                         int flight_id = Integer.parseInt(scanner.nextLine());
-                        String queryInfo = "query_flight_info" + flight_id;
+                        String queryInfo = "query_flight_info " + flight_id;
                         udpUtils.sendMessage(queryInfo, serverInetAddress, server_port);
-                    case 3: // 监控座位可用性
+                        break;
+                    case 3: // Monitor seat availability
                         System.out.print("Enter flight ID to monitor: ");
                         int flightId = Integer.parseInt(scanner.nextLine());
                         System.out.print("Enter monitor interval in seconds: ");
                         int monitorInterval = Integer.parseInt(scanner.nextLine());
-                        callback.startMonitoringSeatAvailability(flightId, monitorInterval); // 开始监控
+                        callback.startMonitoringSeatAvailability(flightId, monitorInterval); // Start monitoring
                         break;
-                    case 4: // 选择餐饮（幂等操作）
+                    case 4: // Select meal (Idempotent operation)
                         System.out.print("Enter flight ID to select meal for: ");
                         int mealFlightId = Integer.parseInt(scanner.nextLine());
                         System.out.print("Enter meal option: ");
                         String mealOption = scanner.nextLine();
                         String mealMessage = "SELECT_MEAL " + mealFlightId + " " + mealOption;
-                        udpUtils.sendMessage(mealMessage, serverInetAddress, server_port); // 发送餐饮选择请求
+                        udpUtils.sendMessage(mealMessage, serverInetAddress, server_port); // Send meal selection request
                         String mealResponse = udpUtils.receiveMessage();
                         System.out.println("Server response: " + mealResponse);
                         break;
-                    case 5: // baggage weight（非幂等操作）
+                    case 5: // Baggage weight (Non-idempotent operation)
                         System.out.print("Enter flight ID to purchase baggage survey service for: ");
                         int baggageFlightId = Integer.parseInt(scanner.nextLine());
                         String baggageMessage = "baggage_weight " + baggageFlightId;
-                        udpUtils.sendMessage(baggageMessage, serverInetAddress, server_port); // 发送 VIP 购买请求
+                        udpUtils.sendMessage(baggageMessage, serverInetAddress, server_port); // Send baggage request
                         String baggageResponse = udpUtils.receiveMessage();
                         System.out.println("Server response: " + baggageResponse);
                         break;
-                    case 9: // 退出客户端
+                    case 9: // Exit client
                         System.out.println("Exiting client...");
-                        callback.stopMonitoring(); // 停止所有监控
+                        callback.stopMonitoring(); // Stop all monitoring
                         return;
                     default:
                         System.out.println("Invalid choice. Please try again.");
@@ -106,22 +84,20 @@ public class Client {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace(); // 打印异常堆栈信息
-            System.out.println("Error running client"); // 输出错误信息
+            e.printStackTrace(); // Print exception stack trace
+            System.out.println("Error running client"); // Output error message
         }
     }
 
-
-    // 显示用户菜单
+    // Display user menu
     private static void displayMenu() {
         System.out.println("\nWelcome to the Flight Information System");
         System.out.println("1. Query flight by source and destination");
-        System.out.println("2. Monitor seat availability");
-        System.out.println("3. Select meal (Idempotent)");
-        System.out.println("4. Purchase VIP service (Non-idempotent)");
+        System.out.println("2. Monitor flight information");
+        System.out.println("3. Monitor seat availability");
+        System.out.println("4. Select meal (Idempotent)");
+        System.out.println("5. Baggage weight (Non-idempotent)");
         System.out.println("9. Exit");
         System.out.print("Enter your choice: ");
     }
-
 }
-
