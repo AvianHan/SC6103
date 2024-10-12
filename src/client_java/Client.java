@@ -1,13 +1,13 @@
-// package SC6103_DS.src.client_java;
+package SC6103_DS.src.client_java;
 
 import java.net.*;
 import java.io.*;
 import java.util.*;
+
+import Marshalling.*;
+import Message.*;
 import SC6103_DS.src.client_java.*;
-// import SC6103_DS.src.communication.*;
-import SC6103_DS.src.communication.Message;
-import SC6103_DS.src.communication.Marshalling;
-import SC6103_DS.src.communication.Unmarshalling;
+import Unmarshalling.*;
 
 public class Client {
 
@@ -42,7 +42,7 @@ public class Client {
                         System.out.print("Enter destination place: ");
                         String destination = scanner.nextLine();
                         String queryMessage = "QUERY_FLIGHT " + source + " " + destination;
-                        udpUtils.sendMessage(queryMessage, serverInetAddress, server_port); // Send query message
+                        udpUtils.sendMessage(1, queryMessage, serverInetAddress, server_port); // Send query message
                         String response = udpUtils.receiveMessage(); // Receive response message
                         System.out.println("Server response: " + response);
                         break;
@@ -50,7 +50,7 @@ public class Client {
                         System.out.print("Enter flight ID to monitor: ");
                         int flight_id = Integer.parseInt(scanner.nextLine());
                         String queryInfo = "query_flight_info " + flight_id;
-                        udpUtils.sendMessage(queryInfo, serverInetAddress, server_port);
+                        udpUtils.sendMessage(2, queryInfo, serverInetAddress, server_port);
                         break;
                     case 3: // Monitor seat availability
                         System.out.print("Enter flight ID to monitor: ");
@@ -65,7 +65,7 @@ public class Client {
                         System.out.print("Enter meal option: ");
                         String mealOption = scanner.nextLine();
                         String mealMessage = "SELECT_MEAL " + mealFlightId + " " + mealOption;
-                        udpUtils.sendMessage(mealMessage, serverInetAddress, server_port); // Send meal selection request
+                        udpUtils.sendMessage(4, mealMessage, serverInetAddress, server_port); // Send meal selection request
                         String mealResponse = udpUtils.receiveMessage();
                         System.out.println("Server response: " + mealResponse);
                         break;
@@ -73,7 +73,7 @@ public class Client {
                         System.out.print("Enter flight ID to purchase baggage survey service for: ");
                         int baggageFlightId = Integer.parseInt(scanner.nextLine());
                         String baggageMessage = "baggage_weight " + baggageFlightId;
-                        udpUtils.sendMessage(baggageMessage, serverInetAddress, server_port); // Send baggage request
+                        udpUtils.sendMessage(5, baggageMessage, serverInetAddress, server_port); // Send baggage request
                         String baggageResponse = udpUtils.receiveMessage();
                         System.out.println("Server response: " + baggageResponse);
                         break;

@@ -1,14 +1,11 @@
-// package SC6103_DS.src.client_java;
-
-//import SC6103_DS.communication.*;
-import SC6103_DS.src.communication.Message;
-import SC6103_DS.src.communication.Marshalling;
-import SC6103_DS.src.communication.Unmarshalling;
-
+package SC6103_DS.src.client_java;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+
+import Marshalling.*;
+import Unmarshalling.*;
 
 public class Utils {
     private DatagramSocket socket;
@@ -30,7 +27,8 @@ public class Utils {
         Message message = new Message(messageType, requestId, data);
         try {
             byte[] marshaledMsg = Marshalling.marshalMessage(message);
-            DatagramPacket packet = new DatagramPacket(marshaledMsg, marshaledMsg.length, addr, port);
+            DatagramPacket packet = new DatagramPacket(marshaledMsg, marshaledMsg.length, InetAddress.getByName(addr), port);
+
             socket.send(packet);
         } catch (Exception e) {
             e.printStackTrace();

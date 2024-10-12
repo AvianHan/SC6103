@@ -1,4 +1,4 @@
-package SC6103_DS.src.communication;
+
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

@@ -6,9 +6,9 @@ import java.net.InetAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import SC6103_DS.src.communication.Message;
-import SC6103_DS.src.communication.Marshalling;
-import SC6103_DS.src.communication.Unmarshalling;
+import Marshalling.*;
+import Message.*;
+import Unmarshalling.*;
 
 public class Callback {
     private DatagramSocket socket; // Create a socket for communication
