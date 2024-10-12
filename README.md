@@ -12,6 +12,7 @@ next meeting:
  - UDP sockets
 ![CS Communication Flow](cs-communication-flow.png)
 
+```markdown
 flight_booking_system/
 │
 ├── client_java/
@@ -52,6 +53,7 @@ flight_booking_system/
 │   └── SERVER_GUIDE.md                         # 服务器部署与运行指南
 │
 └── Makefile                                    # 顶层Makefile，用于编译整个项目
+```
 
 ### Server
 
