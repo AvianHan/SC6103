@@ -60,6 +60,9 @@
     "stdio.h": "c",
     "head.h": "c",
     "string.h": "c",
-    "server.h": "c"
+    "server.h": "c",
+    "ws2tcpip.h": "c",
+    "unistd.h": "c",
+    "pthread.h": "c"
   }
 }

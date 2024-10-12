@@ -59,7 +59,7 @@ void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_i
                     free(response);
                     return;
                 }
-                sprintf(update_message, "Flight %d updated seats available: %d\n", flight_id, flights[i].available_seats);
+                sprintf(update_message, "Flight %d updated seats available: %d\n", flight_id, flights[i].seat_availability);
                 sendto(sockfd, update_message, strlen(update_message), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
                 free(update_message);
                 break;
