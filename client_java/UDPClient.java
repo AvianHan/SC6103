@@ -7,5 +7,10 @@ public class UDPClient {
 
     public static void main (String server_address, String port_number) {
         DatagramSocket aSocket = null;
+        try {
+            aSocket = new DatagramSocket();
+            byte[] message = message.getBytes();
+            
+        }
     }
 }
