@@ -1,4 +1,4 @@
-#include "message_format.h"
+#include "message.h"
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
