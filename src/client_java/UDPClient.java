@@ -5,8 +5,8 @@ import java.io.*;
 import java.net.InetAddress;
 
 public class UDPClient {
-    private static final String server_address = "";
-    private static final int port_number = "";
+    private static final String server_addr = "";
+    private static final int server_port = "";
 
     public static void main(String server_address, String port_number) {
         DatagramSocket aSocket = null;
