@@ -15,15 +15,22 @@
 
 //server.h
 
-
 // 航班结构体
 typedef struct {
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+} DepartureTime;
+
+typedef struct {
     int flight_id;
-    char source[50];
-    char destination[50];
-    char departure_time[20];
+    char *source_place;
+    char *destination_place;
+    DepartureTime departure_time;
     float airfare;
-    int available_seats;
+    int seat_availability;
 } Flight;
 
 // 回调处理头文件
@@ -33,7 +40,7 @@ void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_i
 void initialize_flights();
 Flight* find_flight_by_id(int flight_id);
 int update_flight_seats(int flight_id, int seats);
-int add_flight(int flight_id, const char *source, const char *destination, const char *departure_time, float airfare, int available_seats);
+int add_flight(int flight_id, const char *source, const char *destination, DepartureTime departure_time, float airfare, int seat_availability);
 
 // 航班服务头文件
 void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buffer);

@@ -33,7 +33,7 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buff
     response[0] = '\0';
 
     for (int i = 0; i < flight_count; i++) {
-        if (strcmp(flights[i].source, source) == 0 && strcmp(flights[i].destination, destination) == 0) {
+        if (strcmp(flights[i].source_place, source) == 0 && strcmp(flights[i].destination_place, destination) == 0) {
             char flight_info[100];
             sprintf(flight_info, "Flight ID: %d\n", flights[i].flight_id);
             strcat(response, flight_info);
@@ -62,8 +62,11 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buf
     int found = 0;
     for (int i = 0; i < flight_count; i++) {
         if (flights[i].flight_id == flight_id) {
-            sprintf(response, "Flight ID: %d\nSource: %s\nDestination: %s\nDeparture Time: %s\nAirfare: %.2f\nAvailable Seats: %d\n",
-                    flights[i].flight_id, flights[i].source, flights[i].destination, flights[i].departure_time, flights[i].airfare, flights[i].available_seats);
+            sprintf(response, "Flight ID: %d\nSource: %s\nDestination: %s\nDeparture Time: %d-%02d-%02d %02d:%02d\nAirfare: %.2f\nAvailable Seats: %d\n",
+                    flights[i].flight_id, flights[i].source_place, flights[i].destination_place,
+                    flights[i].departure_time.year, flights[i].departure_time.month, flights[i].departure_time.day,
+                    flights[i].departure_time.hour, flights[i].departure_time.minute,
+                    flights[i].airfare, flights[i].seat_availability);
             found = 1;
             break;
         }
@@ -91,9 +94,9 @@ void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffe
     int found = 0;
     for (int i = 0; i < flight_count; i++) {
         if (flights[i].flight_id == flight_id) {
-            if (flights[i].available_seats >= seats) {
-                flights[i].available_seats -= seats;
-                sprintf(response, "Reservation successful. Remaining seats: %d\n", flights[i].available_seats);
+            if (flights[i].seat_availability >= seats) {
+                flights[i].seat_availability -= seats;
+                sprintf(response, "Reservation successful. Remaining seats: %d\n", flights[i].seat_availability);
             } else {
                 strcpy(response, "Not enough available seats");
             }
