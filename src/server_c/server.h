@@ -31,27 +31,8 @@ typedef struct {
     DepartureTime departure_time;
     float airfare;
     int seat_availability;
-    char *meal_option;  // 固定几个选项，例如："Standard Meal", "Vegetarian Meal", "Seafood Meal", "Child Meal", "Halal Meal", "Diabetic Meal"
-    float baggage_weight;  // 固定几个等级，例如：20.0, 30.0, 40.0, "Extra Purchase"
+    int baggage_availability;
 } Flight;
-
-// 示例餐食选项
-const char *meal_options[] = {
-    "Standard Meal",
-    "Vegetarian Meal",
-    "Seafood Meal",
-    "Child Meal",
-    "Halal Meal",
-    "Diabetic Meal"
-};
-
-// 示例行李重量等级
-const float baggage_weights[] = {
-    20.0,
-    30.0,
-    40.0,
-    -1.0  // 表示额外购买
-};
 
 // 回调处理头文件
 void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_id, int monitor_interval);
