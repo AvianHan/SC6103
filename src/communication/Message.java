@@ -1,4 +1,4 @@
-package communication;
+package SC6103_DS.communication;
 
 public class Message {
 
