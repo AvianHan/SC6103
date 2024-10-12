@@ -1,6 +1,8 @@
+#include "server.h"    // This must include Flight struct definition
 #include <mysql/mysql.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>    // For strdup and other string functions
 
 // 数据库连接信息
 #define HOST "localhost"
@@ -40,15 +42,32 @@ void query_flights(MYSQL *conn) {
         return;
     }
 
-    int num_fields = mysql_num_fields(result);
     MYSQL_ROW row;
-
-    // 输出查询结果
     while ((row = mysql_fetch_row(result))) {
-        for (int i = 0; i < num_fields; i++) {
-            printf("%s\t", row[i] ? row[i] : "NULL");
-        }
-        printf("\n");
+        Flight flight;
+        flight.flight_id = atoi(row[0]);
+        flight.source_place = strdup(row[1]);
+        flight.destination_place = strdup(row[2]);
+
+        // 将查询结果填充到 DepartureTime 结构体中
+        flight.departure_time.year = atoi(row[3]);
+        flight.departure_time.month = atoi(row[4]);
+        flight.departure_time.day = atoi(row[5]);
+        flight.departure_time.hour = atoi(row[6]);
+        flight.departure_time.minute = atoi(row[7]);
+
+        flight.airfare = atof(row[8]);
+        flight.seat_availability = atoi(row[9]);
+        flight.baggage_availability = atoi(row[10]);
+
+        // 打印航班信息
+        printf("Flight ID: %d\n", flight.flight_id);
+        printf("Source: %s\n", flight.source_place);
+        printf("Destination: %s\n", flight.destination_place);
+        printf("Departure Time: %d-%d-%d %d:%d\n", flight.departure_time.year, flight.departure_time.month, flight.departure_time.day, flight.departure_time.hour, flight.departure_time.minute);
+        printf("Airfare: %.2f\n", flight.airfare);
+        printf("Seats Available: %d\n", flight.seat_availability);
+        printf("Baggage Availability: %d\n\n", flight.baggage_availability);
     }
 
     mysql_free_result(result);

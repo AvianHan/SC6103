@@ -10,9 +10,7 @@
                 "${file}",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "-I", "F:/anzhuangbao/Wnmp-4.2.0/mariadb-bins/default/include",  // 头文件路径
-                "-L", "F:/anzhuangbao/Wnmp-4.2.0/mariadb-bins/default/lib",      // 库文件路径
-                "-lmariadb"                               // 链接MariaDB客户端库
+                ""
             ],
             "options": {
                 "cwd": "C:/MinGW/bin"
