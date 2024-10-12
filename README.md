@@ -152,7 +152,7 @@ printed on the screen.
         - client_id
             - client_addr
             - client_port
-        - user_id
+        - unique_identifier
     - data_length: int, 4 Bytes
     - data: flight
         - int: 4 Bytes
