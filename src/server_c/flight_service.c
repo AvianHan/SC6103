@@ -23,31 +23,53 @@ extern int flight_count;
 // 处理航班查询请求（通过出发地和目的地）
 void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
     char source[50], destination[50];
-    sscanf(buffer, "QUERY_FLIGHT %s %s", source, destination);
-
+    int found = 0;
+    
+    // 动态分配内存给 response
     char *response = (char *)malloc(BUFFER_SIZE * sizeof(char));
     if (response == NULL) {
         perror("Memory allocation failed");
         return;
     }
-    response[0] = '\0';
+    memset(response, 0, response_size);
 
+    // 从客户端请求中提取出发地和目的地
+    sscanf(buffer, "QUERY_FLIGHT %s %s", source, destination);
+
+    // 遍历航班数组，查找匹配的出发地和目的地
     for (int i = 0; i < flight_count; i++) {
         if (strcmp(flights[i].source_place, source) == 0 && strcmp(flights[i].destination_place, destination) == 0) {
             char flight_info[200];
             sprintf(flight_info, "Flight ID: %d\nMeal Option: %s\nBaggage Weight: %.2f kg\n",
                     flights[i].flight_id, flights[i].meal_option, flights[i].baggage_weight);
-            strcat(response, flight_info);
+
+            // 检查 response 缓冲区是否足够大，动态扩展
+            if (strlen(response) + strlen(flight_info) >= response_size) {
+                response_size *= 2;  // 扩展为原来的两倍
+                response = (char *)realloc(response, response_size * sizeof(char));
+                if (response == NULL) {
+                    perror("Memory reallocation failed");
+                    return;
+                }
+            }
+
+            strcat(response, flight_info);  // 将找到的航班信息附加到响应中
+            found++;
         }
     }
 
-    if (strlen(response) == 0) {
-        strcpy(response, "No flights found for the given source and destination");
+    // 如果没有找到匹配的航班，返回错误消息
+    if (!found) {
+        strcpy(response, "No flights found.\n");
     }
 
+    // 将查询结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+
+    // 释放动态分配的内存
     free(response);
 }
+
 
 // 处理航班详细信息查询请求（通过航班ID）
 void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
