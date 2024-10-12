@@ -69,7 +69,8 @@ public class Client {
                     case 2: // 查询航班信息
                         System.out.print("Enter flight ID to monitor: ");
                         int flight_id = Integer.parseInt(scanner.nextLine());
-                        String queryInfo = ""
+                        String queryInfo = "query_flight_info" + flight_id;
+                        udpUtils.sendMessage(queryInfo, serverInetAddress, server_port);
                     case 3: // 监控座位可用性
                         System.out.print("Enter flight ID to monitor: ");
                         int flightId = Integer.parseInt(scanner.nextLine());
