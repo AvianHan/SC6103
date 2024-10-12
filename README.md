@@ -21,8 +21,7 @@ flight:
     }
     airfare: float
     seat_availability: int // num of seats available
-    meal_option: variable-length str 固定几个选项
-    baggage_weight: float 固定几个等级
+    baggage_availability: int
 }
 ```
 
@@ -51,23 +50,19 @@ flight:
         return an error message
 }
 
-4. [idempotent] select_meal (flight_id, meal_option) {
-    if flight_id does not exist or meal_option is unavailable:
+4. [idempotent] query_baggage_availability (flight_id) {
+    if flight_id does not exist:
         return an error message
-    if meal_option is already selected by this client:
-        return acknowledgement to client
-    if meal_option is available:
-        set the selected meal option for the client
-        return acknowledgement
+    else:
+        return baggage_availability
 }
 
-5. [non-idempotent] add_extra_baggage (flight_id, baggage_weight) {
-    if flight_id does not exist or baggage_weight exceeds maximum allowable weight:
+5. [non-idempotent] add_baggage (flight_id, num_baggages) {
+    if successful reservation:
+        return acknowledgement to client
+        update baggage_availability on server
+    if flight_id does not exist or insufficient available for num_baggages:
         return an error message
-    if baggage_weight is within allowable limits:
-        add baggage_weight to the total baggage for this flight
-        charge the client based on the weight
-        return acknowledgement
 }
 
 6. callback
@@ -110,7 +105,7 @@ printed on the screen.
         - 0xxx xxxx request
             - 0xxx 0 register
             - 0xxx 1 query_flight_id
-            - 0xxx 2 query_departure_time
+            - 0xxx 2 query_flight_info
             - 0xxx 3 make_seat_reservation
             - 0xxx 4 select_meal
             - 0xxx 5 add_extra_baggage
@@ -119,7 +114,7 @@ printed on the screen.
         - client_id
             - client_addr
             - client_port
-        - request_id_for_each_client
+        - user_id
     - data_length: int, 4 Bytes
     - data
         - int: 4 Bytes
@@ -142,9 +137,6 @@ printed on the screen.
         - client: timeout
 4. Which semantics to use can be specified as an argument in the command that starts the client/server
 
-
-
-## Database
 
 
 # Meeting Notes
