@@ -3,8 +3,12 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
-// import SC6103_DS.src.client_java.*;
-import SC6103_DS.src.communication.*;
+import SC6103_DS.src.client_java.*;
+// import SC6103_DS.src.communication.*;
+import SC6103_DS.src.communication.Marshalling;
+import SC6103_DS.src.communication.Message;
+import SC6103_DS.src.communication.Flight;
+import SC6103_DS.src.communication.MessageStructure;
 
 public class Client {
 
