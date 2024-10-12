@@ -27,4 +27,24 @@ public class Marshalling {
 
         return buffer.array();
     }
+
+    // Method to marshal a String into a byte array
+    public static byte[] marshalString(String value) {
+        return value.getBytes(StandardCharsets.UTF_8);
+    }
+
+    // Method to marshal an int into a byte array
+    public static byte[] marshalInt(int value) {
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        buffer.putInt(value);
+        return buffer.array();
+    }
+
+    // Method to marshal a float into a byte array
+    public static byte[] marshalFloat(float value) {
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        buffer.putFloat(value);
+        return buffer.array();
+    }
+
 }
