@@ -60,6 +60,16 @@ int main() {
 
     printf("Server is running on port %d...\n", PORT);
 
+    // 启动一个线程来监控航班状态
+    pthread_t monitor_thread;
+    if (pthread_create(&monitor_thread, NULL, (void *)register_callback, (void *)&sockfd) != 0) {
+    perror("Thread creation failed");
+    close(sockfd);
+    free(buffer);
+    exit(EXIT_FAILURE);
+}
+
+
     // 主循环：处理客户端请求
     while (1) {
         memset(buffer, 0, BUFFER_SIZE);
