@@ -96,3 +96,4 @@ void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *bu
         sendto(sockfd, error_msg, strlen(error_msg), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
     }
 }
+// server

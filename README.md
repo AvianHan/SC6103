@@ -12,6 +12,49 @@ next meeting:
  - UDP sockets
 ![CS Communication Flow](cs-communication-flow.png)
 
+```markdown
+flight_booking_system/
+│
+├── client_java/
+│   ├── src/
+│   │   ├── com/
+│   │   │   ├── flightsystem/
+│   │   │   │   ├── Client.java                 # 客户端主程序
+│   │   │   │   ├── UserInterface.java          # 用户界面管理
+│   │   │   │   ├── MessageUtils.java           # 数据编组和解组工具类
+│   │   │   │   ├── CallbackHandler.java        # 处理回调的类
+│   │   │   │   └── UDPUtils.java               # UDP套接字工具类
+│   │   └── resources/
+│   │       └── config.properties               # 配置文件，存储服务器地址和端口等信息
+│   └── build.gradle                            # Gradle构建脚本
+│
+├── server/
+│   ├── server.c                                # 服务器主程序
+│   ├── flight_service.c                        # 航班相关服务实现
+│   ├── flight_service.h                        # 航班服务头文件
+│   ├── callback_handler.c                      # 处理回调的实现
+│   ├── callback_handler.h                      # 回调处理头文件
+│   ├── data_storage.c                          # 航班数据存储与管理
+│   ├── data_storage.h                          # 数据存储头文件
+│   ├── thread_pool.c                           # 线程池管理
+│   ├── thread_pool.h                           # 线程池头文件
+│   └── Makefile                                # 用于编译服务器代码的Makefile
+│
+├── common/
+│   ├── protocol.h                              # 通信协议头文件，定义请求类型、消息格式等
+│   ├── udp_utils.c                             # UDP套接字相关的通用工具函数
+│   ├── udp_utils.h                             # 套接字工具头文件
+│   └── Makefile                                # 用于编译通用模块的Makefile
+│
+├── docs/
+│   ├── README.md                               # 项目概述和使用说明
+│   ├── SYSTEM_ARCHITECTURE.md                  # 系统架构文档
+│   ├── CLIENT_GUIDE.md                         # 客户端使用指南
+│   └── SERVER_GUIDE.md                         # 服务器部署与运行指南
+│
+└── Makefile                                    # 顶层Makefile，用于编译整个项目
+```
+
 ### Server
 
 #### store the information of all flights
@@ -96,6 +139,101 @@ flight:
 
 6. create a new thread to serve each request received
 ```
+
+要搭建该服务器，请按照以下步骤操作：
+
+### 1. 项目结构设置
+根据给定的项目结构，创建文件夹和文件：
+```bash
+mkdir -p flight_booking_system/server
+cd flight_booking_system/server
+touch server.c flight_service.c flight_service.h callback_handler.c callback_handler.h data_storage.c data_storage.h thread_pool.c thread_pool.h Makefile
+```
+
+### 2. 编写代码
+根据提供的框架细化代码。在每个文件中实现相应的功能：
+
+- **server.c**: 主服务器程序，负责监听客户端请求并进行处理。
+- **flight_service.c / flight_service.h**: 实现航班查询、航班详细信息和座位预订等服务。
+- **callback_handler.c / callback_handler.h**: 用于处理客户端监控服务中的回调请求。
+- **data_storage.c / data_storage.h**: 负责航班数据的管理（存储、添加、更新等操作）。
+- **thread_pool.c / thread_pool.h**: 提供一个简单的线程池用于处理并发请求。
+
+#### server.c（主程序框架）
+主要实现服务器套接字的创建、绑定，以及请求处理的逻辑。
+
+#### flight_service.c / flight_service.h
+这里实现所有与航班服务相关的功能，如航班查询、航班详细信息、座位预订等。将`server.c`中关于航班处理的代码迁移到`flight_service.c`中，并使用头文件来声明这些函数，以便在主程序中调用。
+
+例如：
+```c
+// flight_service.h
+#ifndef FLIGHT_SERVICE_H
+#define FLIGHT_SERVICE_H
+
+#include <netinet/in.h>
+
+void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+
+#endif
+```
+
+### 3. 实现Makefile
+创建一个`Makefile`用于管理编译过程，支持编译所有源文件并生成可执行文件：
+```makefile
+CC = gcc
+CFLAGS = -Wall -g
+OBJ = server.o flight_service.o callback_handler.o data_storage.o thread_pool.o udp_utils.o
+
+all: server
+
+server: $(OBJ)
+	$(CC) $(CFLAGS) -o server $(OBJ)
+
+server.o: server.c
+	$(CC) $(CFLAGS) -c server.c
+
+flight_service.o: flight_service.c flight_service.h
+	$(CC) $(CFLAGS) -c flight_service.c
+
+callback_handler.o: callback_handler.c callback_handler.h
+	$(CC) $(CFLAGS) -c callback_handler.c
+
+data_storage.o: data_storage.c data_storage.h
+	$(CC) $(CFLAGS) -c data_storage.c
+
+thread_pool.o: thread_pool.c thread_pool.h
+	$(CC) $(CFLAGS) -c thread_pool.c
+
+udp_utils.o: ../common/udp_utils.c ../common/udp_utils.h
+	$(CC) $(CFLAGS) -c ../common/udp_utils.c
+
+clean:
+	rm -f *.o server
+```
+该Makefile支持编译每个模块的源文件，并生成服务器的可执行文件`server`。可以通过执行`make`命令来编译代码。
+
+### 4. 编译和运行
+首先进入`server`目录并使用`Makefile`进行编译：
+```bash
+cd flight_booking_system/server
+make
+```
+如果一切正常，你将看到生成的可执行文件`server`。
+
+然后运行服务器：
+```bash
+./server
+```
+这将启动UDP服务器并监听端口8080的客户端请求。
+
+### 5. 测试
+你可以使用`client_java`项目中的客户端程序来测试服务器是否正常工作。确保在`client_java/resources/config.properties`中设置正确的服务器IP和端口。
+
+### 总结
+通过以上步骤，服务器端的项目已经搭建起来，并且实现了各模块之间的分工协作。这种模块化设计有助于开发和维护，例如，你可以独立开发和测试航班服务模块、回调处理模块等。如果遇到任何问题或需要进一步的解释，请告诉我。
 
 ### Client
 1. provide an interface that repeatedly asks the user to enter a request and sends the request to the server
