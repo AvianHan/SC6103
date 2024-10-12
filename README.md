@@ -1,18 +1,11 @@
-# SC6103_DS
-due 2024.10.16 code + report
-
-due 2024.10.19 demonstration
-
-next meeting: 10.12 after DS class
-
-## A Distributed Flight Information System
+# SC6103_DS: A Distributed Flight Information System
  - CS Architecture
  - UDP sockets
 ![CS Communication Flow](cs-communication-flow.png)
 
-### Server
+## Server
 
-#### store the information of all flights
+### store the information of all flights
 ```
 flight:
 {
@@ -34,7 +27,7 @@ flight:
 ```
 
 
-#### implement services on the flights for remote access by clients
+### implement services on the flights for remote access by clients
 ```
 1. query_flight_id (source_place, destination_place) {
     if multiple flights match:
@@ -43,11 +36,12 @@ flight:
         return an error message
 }
 
-2. query_departure_time (flight_id)
-    query_airfare (flight_id)
-    query_seat_availability (flight_id)
+2. query_flight_info (flight_id) {
     if flight_id does not exist:
         return an error message
+    else:
+        return departure_time, airfare, seat_availability
+}
 
 3. make_seat_reservation (flight_id, num_seats) {
     if successful reservation:
@@ -77,7 +71,7 @@ flight:
 }
 
 6. callback
-    client: 
+    client:
         public interface Callback extends Remote {
             void update_seat_availability (flight_id, seat_availability) throws RemoteException;
         }
@@ -91,39 +85,74 @@ flight:
         }
 
 
-7. create a new thread to serve each request received
+7. create a new thread to serve each request received, and record the client address & port when it receives the request.
+
+8. The received requests and the produced replies should be
+printed on the screen.
 ```
 
 
-### Client
-1. provide an interface that repeatedly asks the user to enter a request and sends the request to the server
+## Client
+1. provide an interface that repeatedly asks the user to enter a request and sends the request to the server (client & user - rolling)
  
 2. include an option for the user to terminate the client
 
 3. already know the server address and port number
 
-4. Message
-    1. self-design format
-    2. transmit in byte array
-        - marshaling (int / float / str)
-        - unmarshalling
+4. Each reply or error message returned from the server should be printed on the screen.
+
+5. GUI
+
+
+## Message
+1. request-reply message structure
+    - message_type: int, 1 Byte
+        - 0xxx xxxx request
+            - 0xxx 0 register
+            - 0xxx 1 query_flight_id
+            - 0xxx 2 query_departure_time
+            - 0xxx 3 make_seat_reservation
+            - 0xxx 4 select_meal
+            - 0xxx 5 add_extra_baggage
+        - 1xxx xxxx reply 同上顺序
+    - request_id: int, 4 Bytes
+        - client_id
+            - client_addr
+            - client_port
+        - request_id_for_each_client
+    - data_length: int, 4 Bytes
+    - data
+        - int: 4 Bytes
+        - float: 4 Bytes
+        - variable-length str
+            - str_length: 4 Bytes
+            - str_content: 1 Byte for 1 character
+2. marshaling & unmarshalling
 ```
  #include <netinet/in.h>
  uint32_t htonl(uint32_t hostlong);
  uint32_t ntohl(uint32_t netlong);
 ```
+3. fault-tolerance
 
 
-## Meeting Notes
-### 2024.10.06
- 1. task decomposition and distribution
+
+## Database
+
+
+# Meeting Notes
+## 2024.10.06 19:00
+ 1. due
+    - 2024.10.16 code + report
+    - 2024.10.19 demonstration
+ 2. task decomposition and distribution
     - server side (C) - Gaohan & Ziling
     - client side (Java) - Fanhui & Shuangyue
- 2. customized function determination
+ 3. customized function determination
     - idempotent: choose meal
     - non-idempotent: buy VIP lounge or other additional services
 
-### 2024.10.12
+## 2024.10.12 after DS class
 
 
 **1. 网络接口编程的介绍**
