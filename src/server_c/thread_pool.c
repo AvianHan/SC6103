@@ -1,5 +1,5 @@
 // 线程池管理
-// thread pool.c
+// thread_pool.c
 #include "server.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,18 +31,18 @@ static ThreadPool pool;
 void *thread_worker(void *arg);
 
 // 初始化线程池
-void thread_pool_init(int num_threads, int queue_capacity) {
+void thread_pool_init(int num_threads) {
     if (num_threads > MAX_THREADS) {
         num_threads = MAX_THREADS;
     }
     pool.queue_size = 0;
     pool.queue_front = 0;
     pool.queue_rear = 0;
-    pool.queue_capacity = queue_capacity;
+    pool.queue_capacity = 100; // 默认任务队列容量为100
     pool.stop = 0;
     pool.num_threads = num_threads;
     
-    pool.task_queue = (Task *)malloc(queue_capacity * sizeof(Task));
+    pool.task_queue = (Task *)malloc(pool.queue_capacity * sizeof(Task));
     if (pool.task_queue == NULL) {
         perror("Failed to allocate memory for task queue");
         exit(EXIT_FAILURE);

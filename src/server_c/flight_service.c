@@ -1,5 +1,5 @@
 // 航班相关服务实现
-// flight service.c
+// flight_service.c
 #include "server.h"
 #include <stdio.h>
 #include <string.h>
@@ -37,6 +37,7 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buff
         perror("Memory allocation failed");
         return;
     }
+    int response_size = BUFFER_SIZE;
     memset(response, 0, response_size);
 
     // 从客户端请求中提取出发地和目的地
@@ -46,8 +47,8 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buff
     for (int i = 0; i < flight_count; i++) {
         if (strcmp(flights[i].source_place, source) == 0 && strcmp(flights[i].destination_place, destination) == 0) {
             char flight_info[200];
-            sprintf(flight_info, "Flight ID: %d\nMeal Option: %s\nBaggage Weight: %.2f kg\n",
-                    flights[i].flight_id, flights[i].meal_option, flights[i].baggage_weight);
+            sprintf(flight_info, "Flight ID: %d\nBaggage Availability: %d kg\n",
+                    flights[i].flight_id, flights[i].baggage_availability);
 
             // 检查 response 缓冲区是否足够大，动态扩展
             if (strlen(response) + strlen(flight_info) >= response_size) {
@@ -106,16 +107,14 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buf
                     "Departure Time: %s\n"
                     "Airfare: %.2f\n"
                     "Seats Available: %d\n"
-                    "Meal Option: %s\n"
-                    "Baggage Weight: %.2f kg\n",
+                    "Baggage Availability: %d kg\n",
                     flights[i].flight_id,
                     flights[i].source_place,
                     flights[i].destination_place,
                     departure_time,  // 使用格式化后的时间
                     flights[i].airfare,
                     flights[i].seat_availability,
-                    flights[i].meal_option,
-                    flights[i].baggage_weight);
+                    flights[i].baggage_availability);
             found = 1;
             break;  // 找到匹配的航班后退出循环
         }

@@ -64,6 +64,7 @@
     "ws2tcpip.h": "c",
     "unistd.h": "c",
     "pthread.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "winsock2.h": "c"
   }
 }
