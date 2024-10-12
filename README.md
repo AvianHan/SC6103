@@ -110,7 +110,7 @@ printed on the screen.
         - 0xxx xxxx request
             - 0xxx 0 register
             - 0xxx 1 query_flight_id
-            - 0xxx 2 query_departure_time
+            - 0xxx 2 query_flight_info
             - 0xxx 3 make_seat_reservation
             - 0xxx 4 select_meal
             - 0xxx 5 add_extra_baggage
