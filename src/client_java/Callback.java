@@ -7,26 +7,26 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Callback {
-    private DatagramSocket socket; // 创建一个套接字，用于通信
-    private InetAddress serverAddress; // 服务器地址
-    private int serverPort; // 服务器端口
-    private ExecutorService executorService; // 创建一个线程池，用于处理回调消息。
+    private DatagramSocket socket; // Create a socket for communication
+    private InetAddress serverAddress; // Server address
+    private int serverPort; // Server port
+    private ExecutorService executorService; // Create a thread pool for handling callback messages
 
-    // 构造函数，初始化 Callback 对象，接收服务器地址和端口作为参数
+    // Constructor to initialize the Callback object, accepting server address and port as parameters
     public Callback(InetAddress serverAddress, int serverPort) {
         try {
-            // 创建一个新的 DatagramSocket，用于与服务器进行 UDP 通信
+            // Create a new DatagramSocket for UDP communication with the server
             this.socket = new DatagramSocket();
             this.serverAddress = serverAddress;
             this.serverPort = serverPort;
-            this.executorService = Executors.newSingleThreadExecutor(); // 用于处理回调的单线程执行器
+            this.executorService = Executors.newSingleThreadExecutor(); // Single-thread executor for handling callbacks
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error initializing Callback");
         }
     }
 
-    // 发送请求以开始监控座位可用性
+    // Send a request to start monitoring seat availability
     public void startMonitoringSeatAvailability(int flightId, int monitorInterval) {
         String message = "MONITOR_SEAT_AVAILABILITY " + flightId + " " + monitorInterval;
         try {
@@ -34,7 +34,7 @@ public class Callback {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddress, serverPort);
             socket.send(packet);
     
-            // 启动一个线程来接收回调消息
+            // Start a thread to receive callback messages
             executorService.submit(() -> receiveCallback(monitorInterval));
         } catch (Exception e) {
             e.printStackTrace();
@@ -42,11 +42,10 @@ public class Callback {
         }
     }
     
-
-    // 接收服务器的回调消息
+    // Receive callback messages from the server
     private void receiveCallback(int monitorInterval) {
         long startTime = System.currentTimeMillis();
-        long monitorIntervalMillis = monitorInterval * 1000L; // 将秒数转换为毫秒
+        long monitorIntervalMillis = monitorInterval * 1000L; // Convert seconds to milliseconds
         try {
             while (System.currentTimeMillis() - startTime < monitorIntervalMillis) {
                 byte[] buffer = new byte[1024];
@@ -55,7 +54,7 @@ public class Callback {
                 String response = new String(packet.getData(), 0, packet.getLength());
                 System.out.println("Callback received: " + response);
     
-                // 处理回调消息，例如更新用户界面
+                // Handle the callback message, e.g., update the user interface
                 handleCallback(response);
             }
         } catch (Exception e) {
@@ -66,14 +65,13 @@ public class Callback {
         }
     }
     
-
-    // 处理回调消息的逻辑
+    // Logic for handling callback messages
     private void handleCallback(String message) {
-        // 此处可以实现对回调消息的具体处理逻辑，例如显示通知或更新数据
+        // Implement specific logic for handling callback messages here, e.g., display notification or update data
         System.out.println("Handling callback message: " + message);
     }
 
-    // 停止监控和关闭资源
+    // Stop monitoring and release resources
     public void stopMonitoring() {
         if (socket != null && !socket.isClosed()) {
             socket.close();
