@@ -71,7 +71,7 @@ flight:
         return acknowledgement
 }
 
-5. [non-idempotent] add_extra_baggage (flight_id, baggage_weight, ) {
+5. [non-idempotent] add_extra_baggage (flight_id, baggage_weight) {
     if flight_id does not exist or baggage_weight exceeds maximum allowable weight:
         return an error message
     if baggage_weight is within allowable limits:
@@ -129,7 +129,7 @@ printed on the screen.
         - client_id
             - client_addr
             - client_port
-        - request_id_for_each_client
+        - user_id
     - data_length: int, 4 Bytes
     - data
         - int: 4 Bytes
