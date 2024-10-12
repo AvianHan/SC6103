@@ -56,7 +56,7 @@ public class Client {
                 int choice = Integer.parseInt(scanner.nextLine());
 
                 switch (choice) {
-                    case 1: // 查询航班
+                    case 1: // 查询航班id
                         System.out.print("Enter source place: ");
                         String source = scanner.nextLine();
                         System.out.print("Enter destination place: ");
@@ -66,14 +66,19 @@ public class Client {
                         String response = udpUtils.receiveMessage(); // 接收响应消息
                         System.out.println("Server response: " + response);
                         break;
-                    case 2: // 监控座位可用性
+                    case 2: // 查询航班信息
+                        System.out.print("Enter flight ID to monitor: ");
+                        int flight_id = Integer.parseInt(scanner.nextLine());
+                        String queryInfo = "query_flight_info" + flight_id;
+                        udpUtils.sendMessage(queryInfo, serverInetAddress, server_port);
+                    case 3: // 监控座位可用性
                         System.out.print("Enter flight ID to monitor: ");
                         int flightId = Integer.parseInt(scanner.nextLine());
                         System.out.print("Enter monitor interval in seconds: ");
                         int monitorInterval = Integer.parseInt(scanner.nextLine());
                         callback.startMonitoringSeatAvailability(flightId, monitorInterval); // 开始监控
                         break;
-                    case 3: // 选择餐饮（幂等操作）
+                    case 4: // 选择餐饮（幂等操作）
                         System.out.print("Enter flight ID to select meal for: ");
                         int mealFlightId = Integer.parseInt(scanner.nextLine());
                         System.out.print("Enter meal option: ");
@@ -83,7 +88,7 @@ public class Client {
                         String mealResponse = udpUtils.receiveMessage();
                         System.out.println("Server response: " + mealResponse);
                         break;
-                    case 4: // baggage weight（非幂等操作）
+                    case 5: // baggage weight（非幂等操作）
                         System.out.print("Enter flight ID to purchase baggage survey service for: ");
                         int baggageFlightId = Integer.parseInt(scanner.nextLine());
                         String baggageMessage = "baggage_weight " + baggageFlightId;

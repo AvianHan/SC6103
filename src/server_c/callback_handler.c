@@ -1,70 +1,95 @@
-// 处理回调的实现
-// callback_handler.c
-#include "server.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdlib.h>
 #ifdef __linux__
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #elif _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <windows.h>
 #pragma comment(lib, "ws2_32.lib")
 #endif
+#include <pthread.h>
+#include "server.h"
+#include "handler.h"
 
 #define BUFFER_SIZE 1024
 
-extern Flight *flights;
-extern int flight_count;
+// 注册的客户端结构体
+typedef struct {
+    struct sockaddr_in client_addr;
+    int flight_id;
+} ClientMonitor;
 
-// 注册客户端以监控航班座位可用性更新
-void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_id, int monitor_interval) {
-    char response[BUFFER_SIZE];  // 使用栈上的内存而不是动态分配
-    int found = 0;
+ClientMonitor client_monitors[100];  // 假设最多有100个客户端监控
+int client_monitor_count = 0;
 
-    // 查找航班
-    for (int i = 0; i < flight_count; i++) {
-        if (flights[i].flight_id == flight_id) {
-            found = 1;
-            break;
-        }
+extern pthread_mutex_t flight_mutex;  // 互斥锁
+
+// 处理客户端请求
+void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
+    char command[20];
+    sscanf(buffer, "%s", command);
+
+    if (strcmp(command, "QUERY_FLIGHT") == 0) {
+        handle_query_flight(sockfd, client_addr, buffer);
+    } else if (strcmp(command, "QUERY_FLIGHT_ID") == 0) {
+        handle_query_details(sockfd, client_addr, buffer);
+    } else if (strcmp(command, "RESERVE") == 0) {
+        handle_reservation(sockfd, client_addr, buffer);
+    } else if (strcmp(command, "ADD_BAGGAGE") == 0) {
+        handle_add_baggage(sockfd, client_addr, buffer);
+    } else if(strcmp(command, "QUERY_BAGGAGE") == 0) {
+        handle_query_baggage_availability(sockfd, client_addr, buffer);
+    } else if(strcmp(command, "MONITOR_FLIGHT") == 0) {
+        int flight_id;
+        sscanf(buffer, "MONITOR_FLIGHT %d", &flight_id);
+        register_flight_monitor(sockfd, client_addr, flight_id);
+    } else {
+        char error_msg[BUFFER_SIZE];
+        strcpy(error_msg, "Invalid command");
+        sendto(sockfd, error_msg, strlen(error_msg), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
     }
+}
 
-    if (!found) {
-        strcpy(response, "Flight not found");
-        sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-        return;
-    }
+// 注册客户端监控航班
+void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int flight_id) {
+    pthread_mutex_lock(&flight_mutex);
 
-    // 成功注册信息
-    sprintf(response, "Registered for flight %d seat availability updates for %d seconds\n", flight_id, monitor_interval);
+    // 注册客户端
+    client_monitors[client_monitor_count].client_addr = *client_addr;
+    client_monitors[client_monitor_count].flight_id = flight_id;
+    client_monitor_count++;
+
+    pthread_mutex_unlock(&flight_mutex);
+
+    char response[BUFFER_SIZE];
+    sprintf(response, "Registered for flight %d seat availability updates\n", flight_id);
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-    // 跟踪航班座位更新,第一次必定会存入当前空余位置因为空余位置必定不为-1
-    int previous_seat_availability = -1;
+}
 
-    // 模拟在监控间隔内每隔一段时间向客户端发送座位更新
-    for (int j = 0; j < monitor_interval; j++) {
-        sleep(1);  // 假设每隔1秒检查一次更新
+// 航班监控线程函数
+void* monitor_flights(void* arg) {
+    int sockfd = *(int*)arg;
 
-        // 检查航班座位是否有更新
-        for (int i = 0; i < flight_count; i++) {
-            if (flights[i].flight_id == flight_id) {
-                if (flights[i].seat_availability != previous_seat_availability) {
-                    previous_seat_availability = flights[i].seat_availability;
-
-                    // 只有当座位情况发生变化时才发送更新
-                    sprintf(response, "Flight %d updated seats available: %d\n", flight_id, flights[i].seat_availability);
-                    sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-                }
-                break;
-            }
+    while (1) {
+        pthread_mutex_lock(&flight_mutex);
+        // 假设航班的 seat_availability 发生变化
+        for (int i = 0; i < client_monitor_count; i++) {
+            int flight_id = client_monitors[i].flight_id;
+            // 这里应该检查 flight_id 对应的航班是否有座位更新
+            // 如果更新，向客户端发送通知
+            char response[BUFFER_SIZE];
+            sprintf(response, "Flight %d updated seat availability\n", flight_id);
+            sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)&client_monitors[i].client_addr, sizeof(client_monitors[i].client_addr));
         }
+        pthread_mutex_unlock(&flight_mutex);
+
+        sleep(5);  // 每5秒检查一次航班状态
     }
 
-    // 监控结束，停止更新
-    strcpy(response, "Monitor interval expired, stopping updates\n");
-    sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+    return NULL;
 }
