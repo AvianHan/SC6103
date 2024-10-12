@@ -20,66 +20,114 @@
 extern Flight *flights;
 extern int flight_count;
 
+// 定义月份名称的数组
+const char *months[] = {
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+};
+
 // 处理航班查询请求（通过出发地和目的地）
 void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
     char source[50], destination[50];
-    sscanf(buffer, "QUERY_FLIGHT %s %s", source, destination);
-
+    int found = 0;
+    
+    // 动态分配内存给 response
     char *response = (char *)malloc(BUFFER_SIZE * sizeof(char));
     if (response == NULL) {
         perror("Memory allocation failed");
         return;
     }
-    response[0] = '\0';
+    memset(response, 0, response_size);
 
+    // 从客户端请求中提取出发地和目的地
+    sscanf(buffer, "QUERY_FLIGHT %s %s", source, destination);
+
+    // 遍历航班数组，查找匹配的出发地和目的地
     for (int i = 0; i < flight_count; i++) {
         if (strcmp(flights[i].source_place, source) == 0 && strcmp(flights[i].destination_place, destination) == 0) {
             char flight_info[200];
             sprintf(flight_info, "Flight ID: %d\nMeal Option: %s\nBaggage Weight: %.2f kg\n",
                     flights[i].flight_id, flights[i].meal_option, flights[i].baggage_weight);
-            strcat(response, flight_info);
+
+            // 检查 response 缓冲区是否足够大，动态扩展
+            if (strlen(response) + strlen(flight_info) >= response_size) {
+                response_size *= 2;  // 扩展为原来的两倍
+                response = (char *)realloc(response, response_size * sizeof(char));
+                if (response == NULL) {
+                    perror("Memory reallocation failed");
+                    return;
+                }
+            }
+
+            strcat(response, flight_info);  // 将找到的航班信息附加到响应中
+            found++;
         }
     }
 
-    if (strlen(response) == 0) {
-        strcpy(response, "No flights found for the given source and destination");
+    // 如果没有找到匹配的航班，返回错误消息
+    if (!found) {
+        strcpy(response, "No flights found.\n");
     }
 
+    // 将查询结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+
+    // 释放动态分配的内存
     free(response);
 }
 
-// 处理航班详细信息查询请求（通过航班ID）
+// 查询航班的函数
 void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
-    int flight_id;
-    sscanf(buffer, "QUERY_DETAILS %d", &flight_id);
+    int flight_id, found = 0;
+    char response[BUFFER_SIZE];  // 用于存储响应内容
+    memset(response, 0, BUFFER_SIZE);
 
-    char *response = (char *)malloc(BUFFER_SIZE * sizeof(char));
-    if (response == NULL) {
-        perror("Memory allocation failed");
-        return;
-    }
+    // 从客户端请求中提取航班ID
+    sscanf(buffer, "QUERY_FLIGHT_ID %d", &flight_id);
 
-    int found = 0;
+    // 遍历航班数组，查找匹配的航班ID
     for (int i = 0; i < flight_count; i++) {
         if (flights[i].flight_id == flight_id) {
-            sprintf(response, "Flight ID: %d\nSource: %s\nDestination: %s\nDeparture Time: %d-%02d-%02d %02d:%02d\nAirfare: %.2f\nAvailable Seats: %d\nMeal Option: %s\nBaggage Weight: %.2f kg\n",
-                    flights[i].flight_id, flights[i].source_place, flights[i].destination_place,
-                    flights[i].departure_time.year, flights[i].departure_time.month, flights[i].departure_time.day,
-                    flights[i].departure_time.hour, flights[i].departure_time.minute,
-                    flights[i].airfare, flights[i].seat_availability,
-                    flights[i].meal_option, flights[i].baggage_weight);
+            char departure_time[100];  // 用于格式化时间
+            
+            // 使用月份名称格式化航班的出发时间为：Month day, year hour:minute
+            sprintf(departure_time, "%s %02d, %d %02d:%02d",
+                    months[flights[i].departure_time.month - 1],  // 通过数组查找月份名称
+                    flights[i].departure_time.day,
+                    flights[i].departure_time.year,
+                    flights[i].departure_time.hour,
+                    flights[i].departure_time.minute);
+
+            // 格式化航班的全部信息，包括优化后的时间显示
+            sprintf(response, 
+                    "Flight ID: %d\n"
+                    "Source: %s\n"
+                    "Destination: %s\n"
+                    "Departure Time: %s\n"
+                    "Airfare: %.2f\n"
+                    "Seats Available: %d\n"
+                    "Meal Option: %s\n"
+                    "Baggage Weight: %.2f kg\n",
+                    flights[i].flight_id,
+                    flights[i].source_place,
+                    flights[i].destination_place,
+                    departure_time,  // 使用格式化后的时间
+                    flights[i].airfare,
+                    flights[i].seat_availability,
+                    flights[i].meal_option,
+                    flights[i].baggage_weight);
             found = 1;
-            break;
+            break;  // 找到匹配的航班后退出循环
         }
     }
 
+    // 如果没有找到匹配的航班，返回错误消息
     if (!found) {
-        strcpy(response, "Flight not found");
+        strcpy(response, "Flight not found.\n");
     }
 
+    // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-    free(response);
 }
 
 // 处理航班座位预订请求

@@ -139,9 +139,6 @@ printed on the screen.
 
 
 
-## Database
-
-
 # Meeting Notes
 ## 2024.10.06 19:00
  1. due
