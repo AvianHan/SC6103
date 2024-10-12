@@ -9,23 +9,20 @@ public class UserInterface {
         this.scanner = new Scanner(System.in);
     }
 
-    // 显示菜单选项
+    // Display menu options
     public void displayMenu() {
         System.out.println("Welcome to the Flight Booking System");
         System.out.println("Please select an option:");
         System.out.println("1. Query Flight by Source and Destination");
-        System.out.println("2. Query Departure Time");
-        System.out.println("3. Query Airfare");
-        System.out.println("4. Query Seat Availability");
-        System.out.println("5. Make Seat Reservation");
-        System.out.println("6. Monitor Seat Availability");
-        System.out.println("7. Select Meal (Idempotent)");
-        System.out.println("8. Purchase VIP Lounge Access (Non-idempotent)");
+        System.out.println("2. Query Flight Information");
+        System.out.println("3. Monitor Seat Availability");
+        System.out.println("4. Select meal");
+        System.out.println("5. Baggage weight");
         System.out.println("9. Exit");
         System.out.print("Enter your choice: ");
     }
 
-    // 获取用户选择
+    // Get user's choice
     public int getUserChoice() {
         int choice = -1;
         try {
@@ -36,7 +33,7 @@ public class UserInterface {
         return choice;
     }
 
-    // 获取航班信息
+    // Get flight information
     public String[] getFlightInfo() {
         System.out.print("Enter source place: ");
         String source = scanner.nextLine();
@@ -45,24 +42,24 @@ public class UserInterface {
         return new String[] { source, destination };
     }
 
-    // 获取航班ID
+    // Get flight ID
     public int getFlightId() {
         System.out.print("Enter flight ID: ");
         return Integer.parseInt(scanner.nextLine());
     }
 
-    // 获取座位数量
+    // Get seat number
     public int getSeatNumber() {
         System.out.print("Enter number of seats to reserve: ");
         return Integer.parseInt(scanner.nextLine());
     }
 
-    // 显示服务器响应
+    // Display server response
     public void displayResponse(String response) {
         System.out.println("Server response: " + response);
     }
 
-    // 关闭资源
+    // Close resources
     public void close() {
         scanner.close();
     }
