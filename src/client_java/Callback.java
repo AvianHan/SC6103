@@ -7,8 +7,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import SC6103_DS.src.communication.Marshalling;
 import SC6103_DS.src.communication.Message;
-import SC6103_DS.src.communication.Flight;
-import SC6103_DS.src.communication.MessageStructure;
+import SC6103_DS.src.communication.Message.Flight;
+import SC6103_DS.src.communication.Message.MessageStructure;
 
 public class Callback {
     private DatagramSocket socket; // Create a socket for communication

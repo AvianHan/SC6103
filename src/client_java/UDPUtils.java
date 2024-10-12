@@ -1,10 +1,11 @@
-package SC6103_DS.src.client_java;
+// package SC6103_DS.src.client_java;
 
 //import SC6103_DS.communication.*;
-import SC6103_DS.src.communication.Marshalling;
 import SC6103_DS.src.communication.Message;
-import SC6103_DS.src.communication.Flight;
-import SC6103_DS.src.communication.MessageStructure;
+import SC6103_DS.src.communication.Message.MessageStructure;
+import SC6103_DS.src.communication.Message.Flight;
+import SC6103_DS.src.communication.Marshalling;
+
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -25,9 +26,9 @@ public class UDPUtils {
 
     // 发送消息到指定的服务器地址和端口
     public void sendMessage(int messageType, int requestId, int dataLength, Flight data) {
-        Message message = new Message(messageType, requestId, dataLength, data);
+        Message message = new MessageStructure(messageType, requestId, dataLength, data);
         try {
-            byte[] marshaledMessage = Marshalling.marshalMessage(message);
+            byte[] marshaledMessage = Marshalling.marshalFlight(message);
             DatagramPacket packet = new DatagramPacket(marshaledMessage);
             socket.send(packet);
         } catch (Exception e) {
