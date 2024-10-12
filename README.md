@@ -21,18 +21,7 @@ flight:
     }
     airfare: float
     seat_availability: int // num of seats available
-    meal_option: variable-length str 固定几个选项
-        "Standard Meal",
-        "Vegetarian Meal",
-        "Seafood Meal",
-        "Child Meal",
-        "Halal Meal",
-        "Diabetic Meal"
-    baggage_weight: float 固定几个等级
-        20.0,
-        30.0,
-        40.0,
-        -1.0
+    baggage_availability: int
 }
 ```
 
@@ -61,23 +50,19 @@ flight:
         return an error message
 }
 
-4. [idempotent] select_meal (flight_id, meal_option) {
-    if flight_id does not exist or meal_option is unavailable:
+4. [idempotent] query_baggage_availability (flight_id) {
+    if flight_id does not exist:
         return an error message
-    if meal_option is already selected by this client:
-        return acknowledgement to client
-    if meal_option is available:
-        set the selected meal option for the client
-        return acknowledgement
+    else:
+        return baggage_availability
 }
 
-5. [non-idempotent] add_extra_baggage (flight_id, baggage_weight) {
-    if flight_id does not exist or baggage_weight exceeds maximum allowable weight:
+5. [non-idempotent] add_baggage (flight_id, num_baggages) {
+    if successful reservation:
+        return acknowledgement to client
+        update baggage_availability on server
+    if flight_id does not exist or insufficient available for num_baggages:
         return an error message
-    if baggage_weight is within allowable limits:
-        add baggage_weight to the total baggage for this flight
-        charge the client based on the weight
-        return acknowledgement
 }
 
 6. callback
