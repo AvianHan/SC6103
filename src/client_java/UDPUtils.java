@@ -1,5 +1,7 @@
 package SC6103_DS.src.client_java;
 
+import SC6103_DS.communication.*;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -18,10 +20,11 @@ public class UDPUtils {
     }
 
     // 发送消息到指定的服务器地址和端口
-    public void sendMessage(String message, InetAddress serverAddress, int serverPort) {
+    public void sendMessage(int messageType, int requestId, int dataLength, Flight data) {
+        Message message = new Message(messageType, requestId, dataLength, data);
         try {
-            byte[] buffer = message.getBytes();
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddress, serverPort);
+            byte[] marshaledMessage = Marshalling.marshalMessage(message);
+            DatagramPacket packet = new DatagramPacket(marshaledMessage);
             socket.send(packet);
         } catch (Exception e) {
             e.printStackTrace();
