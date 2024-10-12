@@ -85,6 +85,44 @@ flight:
 8. The received requests and the produced replies should be
 printed on the screen.
 ```
+### Database
+	CREATE DATABASE flight_system;
+ ![image](https://github.com/user-attachments/assets/854a87a7-0e3b-49f4-be92-21ceb1656626)
+ 
+	USE flight_system;
+ ![image](https://github.com/user-attachments/assets/7d17ed79-2d3c-47f4-9caf-17a4f49a7200)
+
+ 	CREATE TABLE flights (
+	flight_id INT AUTO_INCREMENT PRIMARY KEY,
+	source_place VARCHAR(100) NOT NULL,
+	destination_place VARCHAR(100) NOT NULL,
+	departure_year INT NOT NULL,
+	departure_month INT NOT NULL,
+	departure_day INT NOT NULL,
+	departure_hour INT NOT NULL,
+	departure_minute INT NOT NULL,
+	airfare FLOAT NOT NULL,
+	seat_availability INT NOT NULL,
+	baggage_availability INT NOT NULL
+ 	);
+![image](https://github.com/user-attachments/assets/eac83249-68d0-4d1b-b045-011e88e62df7)
+
+	INSERT INTO flights (source_place, destination_place, departure_year, departure_month, departure_day, departure_hour, departure_minute, airfare, 	seat_availability, baggage_availability)
+	VALUES 
+	('Singapore', 'Tokyo', 2024, 10, 12, 8, 0, 500.0, 50, 100),
+	('Singapore', 'New York', 2024, 10, 13, 23, 0, 1200.0, 30, 50);
+![image](https://github.com/user-attachments/assets/15955ded-6f2c-491c-b7c2-fa2857e98022)
+
+	SELECT * FROM flights;
+![image](https://github.com/user-attachments/assets/df31c795-4781-4066-a20d-d8b23099c47f)
+
+	gcc -o database_connect F:/ntu/course/6103/SC6103_DS/src/server_c/database_connect.c -IF:/anzhuangbao/Wnmp-4.2.0/mariadb-bins/default/include -	LF:/anzhuangbao/Wnmp-4.2.0/mariadb-bins/default/lib F:/anzhuangbao/Wnmp-4.2.0/mariadb-bins/default/lib/libmariadb.dll
+![image](https://github.com/user-attachments/assets/1f541da9-b92d-47f0-8601-bf052a54a642)
+
+	F:/ntu/course/6103/SC6103_DS/src/server_c/database_connect.exe
+![image](https://github.com/user-attachments/assets/4fac1f70-e702-4880-b7eb-1c40608edbd4)
+
+
 
 
 ## Client
@@ -107,8 +145,8 @@ printed on the screen.
             - 0xxx 1 query_flight_id
             - 0xxx 2 query_flight_info
             - 0xxx 3 make_seat_reservation
-            - 0xxx 4 select_meal
-            - 0xxx 5 add_extra_baggage
+            - 0xxx 4 query_baggage_availability
+            - 0xxx 5 add_baggage
         - 1xxx xxxx reply 同上顺序
     - request_id: int, 4 Bytes
         - client_id
@@ -116,7 +154,7 @@ printed on the screen.
             - client_port
         - user_id
     - data_length: int, 4 Bytes
-    - data
+    - data: flight
         - int: 4 Bytes
         - float: 4 Bytes
         - variable-length str

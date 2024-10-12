@@ -1,4 +1,4 @@
-package SC6103_DS.client_java;
+package SC6103_DS.src.client_java;
 
 import java.util.Scanner;
 
