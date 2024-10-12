@@ -1,3 +1,5 @@
+# make file
+# push new txt test
 # 用于编译服务器代码的Makefile
 CC = gcc
 CFLAGS = -Wall -g
