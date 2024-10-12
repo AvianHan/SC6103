@@ -107,8 +107,8 @@ printed on the screen.
             - 0xxx 1 query_flight_id
             - 0xxx 2 query_flight_info
             - 0xxx 3 make_seat_reservation
-            - 0xxx 4 select_meal
-            - 0xxx 5 add_extra_baggage
+            - 0xxx 4 query_baggage_availability
+            - 0xxx 5 add_baggage
         - 1xxx xxxx reply 同上顺序
     - request_id: int, 4 Bytes
         - client_id
@@ -116,7 +116,7 @@ printed on the screen.
             - client_port
         - user_id
     - data_length: int, 4 Bytes
-    - data
+    - data: flight
         - int: 4 Bytes
         - float: 4 Bytes
         - variable-length str
