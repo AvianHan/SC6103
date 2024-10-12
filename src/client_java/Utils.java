@@ -1,21 +1,17 @@
-// package SC6103_DS.src.client_java;
-
-//import SC6103_DS.communication.*;
-import SC6103_DS.src.communication.Message;
-import SC6103_DS.src.communication.Message.MessageStructure;
-import SC6103_DS.src.communication.Message.Flight;
-import SC6103_DS.src.communication.Marshalling;
-
+package SC6103_DS.src.client_java;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class UDPUtils {
+import Marshalling.*;
+import Unmarshalling.*;
+
+public class Utils {
     private DatagramSocket socket;
 
     // 构造函数，创建一个UDP套接字
-    public UDPUtils() {
+    public Utils() {
         try {
             this.socket = new DatagramSocket();
         } catch (Exception e) {
@@ -25,11 +21,14 @@ public class UDPUtils {
     }
 
     // 发送消息到指定的服务器地址和端口
-    public void sendMessage(int messageType, int requestId, int dataLength, Flight data) {
-        Message message = new MessageStructure(messageType, requestId, dataLength, data);
+    public void sendMessage(int messageType, Message.Flight data, String addr, int port) {
+        int uniqueIdentifier = 1; // need to modify later!!!!
+        int requestId = (addr.hashCode() << 16) | (port << 8) | uniqueIdentifier;
+        Message message = new Message(messageType, requestId, data);
         try {
-            byte[] marshaledMessage = Marshalling.marshalFlight(message);
-            DatagramPacket packet = new DatagramPacket(marshaledMessage);
+            byte[] marshaledMsg = Marshalling.marshalMessage(message);
+            DatagramPacket packet = new DatagramPacket(marshaledMsg, marshaledMsg.length, InetAddress.getByName(addr), port);
+
             socket.send(packet);
         } catch (Exception e) {
             e.printStackTrace();

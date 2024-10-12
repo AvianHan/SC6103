@@ -36,14 +36,16 @@ typedef struct {
 
 // 回调处理头文件
 void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_id, int monitor_interval);
-void* monitor_flights(void* arg);
 void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int flight_id);
+void* monitor_flights(void* arg);
 
 // 数据存储头文件
 void initialize_flights();
 Flight* find_flight_by_id(int flight_id);
 int update_flight_seats(int flight_id, int seats);
-int add_flight(int flight_id, const char *source, const char *destination, DepartureTime departure_time, float airfare, int seat_availability);
+int add_flight(int flight_id, const char *source, const char *destination, DepartureTime departure_time, float airfare, int seat_availability, int baggage_availability);
+
 
 // 航班服务头文件
 void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buffer);
