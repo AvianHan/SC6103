@@ -1,6 +1,6 @@
 // 航班数据存储与管理
 // data storage
-#include "data_storage.h"
+#include "head.h"
 #include <string.h>
 #include <stdio.h>
 

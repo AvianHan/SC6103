@@ -12,10 +12,7 @@
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 #endif
-#include "flight_service.h"
-#include "callback_handler.h"
-#include "data_storage.h"
-#include "thread_pool.h"
+#include "head.h"
 
 #define PORT 8080
 #define BUFFER_SIZE 1024
