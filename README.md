@@ -28,6 +28,8 @@ flight:
     }
     airfare: float
     seat_availability: int // num of seats available
+    meal_option: variable-length str 固定几个选项
+    baggage_weight: float 固定几个等级
 }
 ```
 
@@ -55,15 +57,34 @@ flight:
         return an error message
 }
 
-4. callback (server & client): monitor_seat_availability (main pre content)
+4. [idempotent] select_meal (flight_id, meal_option) {
+    if flight_id does not exist:
+        return an error message
+    if meal_option is unavailable:
+        return an error message
+    if meal_option is already selected by this client:
+        return acknowledgement to client
+    if meal_option is available:
+        set the selected meal option for the client
+        return acknowledgement
+}
 
-5. two more operations on the flights through client-server communication:
-    - one idempotent 选餐
-    - one non-idempotent VIP休息室+其他各类需求购买
+5. [non-idempotent] add_extra_baggage (flight_id, baggage_weight) {
+    if flight_id does not exist:
+        return an error message
+    if baggage_weight exceeds maximum allowable weight:
+        return an error message
+    if baggage_weight is within allowable limits:
+        add baggage_weight to the total baggage for this flight
+        charge the client based on the weight
+        return acknowledgement
+}
 
-6. create a new thread to serve each request received
+6. callback (server & client): monitor_seat_availability (main pre content)
 
-7. The client address is obtained by the server
+7. create a new thread to serve each request received
+
+8. The client address is obtained by the server
 when it receives a request from a client.
 ```
 
