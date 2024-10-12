@@ -33,6 +33,38 @@ flight:
 }
 ```
 
+**1. 网络接口编程的介绍**
+
+- 接口的定义和目的
+- 接口通信的概述（客户端-服务器模型）
+- 连程间通信的概念
+
+**2. 接口和端口概述**
+
+- 接口终端的说明
+- 将接口绑定到（网络地址，本地端口）的配对
+- 连程间通信的详情
+
+**3. C 语言中的接口编程**
+
+- UNIX 系统上的接口编程概述
+- 主要系统调用：
+    - `socket()`: 创建接口
+    - `close()`: 销毁接口
+    - `bind()`: 将接口绑定到地址
+    - `sendto()` 和 `recvfrom()`: 发送和接收数据
+    - `select()`: 检测达到的消息
+- 使用 C 语言实现 UDP 通信的示例：
+    - 客户端-服务器的消息交换
+
+**4. C 语言中的 TCP 通信**
+
+- TCP 通信的系统调用
+- 建立连接（服务器端的 `listen()`，`accept()` 和客户端的 `connect()`）
+- 使用 `write()` 和 `read()` 进行数据传输
+- TCP 客户端-服务器交互的示例
+
+
 #### implement services on the flights for remote access by clients
 ```
 1. query_flight_id (source_place, destination_place) {
