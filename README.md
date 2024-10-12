@@ -20,11 +20,11 @@ flight:
     source_place: variable-length str
     destination_place: variable-length str
     departure_time: {
-        year
-        month
-        day
-        hour
-        minute
+        year: int
+        month: int
+        day: int
+        hour: int
+        minute: int
     }
     airfare: float
     seat_availability: int // num of seats available
@@ -53,14 +53,12 @@ flight:
     if successful reservation:
         return acknowledgement to client
         update seat_availability on server 
-    if incorrect user input (flight_id does not exist or insufficient available for num_seats):
+    if flight_id does not exist or insufficient available for num_seats:
         return an error message
 }
 
 4. [idempotent] select_meal (flight_id, meal_option) {
-    if flight_id does not exist:
-        return an error message
-    if meal_option is unavailable:
+    if flight_id does not exist or meal_option is unavailable:
         return an error message
     if meal_option is already selected by this client:
         return acknowledgement to client
@@ -70,9 +68,7 @@ flight:
 }
 
 5. [non-idempotent] add_extra_baggage (flight_id, baggage_weight) {
-    if flight_id does not exist:
-        return an error message
-    if baggage_weight exceeds maximum allowable weight:
+    if flight_id does not exist or baggage_weight exceeds maximum allowable weight:
         return an error message
     if baggage_weight is within allowable limits:
         add baggage_weight to the total baggage for this flight
@@ -80,12 +76,22 @@ flight:
         return acknowledgement
 }
 
-6. callback (server & client): monitor_seat_availability (main pre content)
+6. callback
+    client: 
+        public interface Callback extends Remote {
+            void update_seat_availability (flight_id, seat_availability) throws RemoteException;
+        }
+    server: 多线程能够处理多个client的同时更新
+        public interface Monitor extends Remote {
+            void register (Callback cbObject, flight_id, monitor_interval) throws RemoteException {
+                record the server_address & port_number;
+                if monitor_interval expire then remove the client record;
+            }
+            void deregister (Callback cbObject) throws RemoteException;
+        }
+
 
 7. create a new thread to serve each request received
-
-8. The client address is obtained by the server
-when it receives a request from a client.
 ```
 
 
