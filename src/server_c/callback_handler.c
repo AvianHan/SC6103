@@ -1,9 +1,10 @@
 // 处理回调的实现
 // callback_handler
-#include "head.h"
+#include "server.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 #ifdef __linux__
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -16,12 +17,17 @@
 
 #define BUFFER_SIZE 1024
 
-extern Flight flights[];
+extern Flight *flights;
 extern int flight_count;
 
 // 注册客户端以监控航班座位可用性更新
 void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_id, int monitor_interval) {
-    char response[BUFFER_SIZE];
+    char *response = (char *)malloc(BUFFER_SIZE * sizeof(char));  //动态内存分配
+    if (response == NULL) {
+        perror("Memory allocation failed");
+        return;
+    }
+
     int found = 0;
     for (int i = 0; i < flight_count; i++) {
         if (flights[i].flight_id == flight_id) {
@@ -33,6 +39,7 @@ void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_i
     if (!found) {
         strcpy(response, "Flight not found");
         sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+        free(response);
         return;
     }
 
@@ -46,9 +53,15 @@ void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_i
         // 在实际实现中，应该检查航班座位是否有更新
         for (int i = 0; i < flight_count; i++) {
             if (flights[i].flight_id == flight_id) {
-                char update_message[BUFFER_SIZE];
+                char *update_message = (char *)malloc(BUFFER_SIZE * sizeof(char));
+                if (update_message == NULL) {
+                    perror("Memory allocation failed");
+                    free(response);
+                    return;
+                }
                 sprintf(update_message, "Flight %d updated seats available: %d\n", flight_id, flights[i].available_seats);
                 sendto(sockfd, update_message, strlen(update_message), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+                free(update_message);
                 break;
             }
         }
@@ -56,4 +69,5 @@ void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_i
 
     strcpy(response, "Monitor interval expired, stopping updates\n");
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+    free(response);
 }

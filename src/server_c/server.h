@@ -13,7 +13,7 @@
 #endif
 #include <pthread.h>
 
-//head.h
+//server.h
 
 
 // 航班结构体
