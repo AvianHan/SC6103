@@ -97,6 +97,8 @@ void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *bu
         handle_reservation(sockfd, client_addr, buffer);
     } else if (strcmp(command, "ADD_BAGGAGE") == 0){
         handle_add_baggage(sockfd, client_addr, buffer);
+    } else if(strcmp(command, "QUERY_BAGGAGE") == 0){
+        handle_query_baggage_availability(sockfd, client_addr, buffer);
     } else {
         char *error_msg = (char *)malloc(BUFFER_SIZE * sizeof(char));
         if (error_msg == NULL) {

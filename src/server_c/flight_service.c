@@ -219,3 +219,33 @@ void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *buffe
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 }
+
+
+void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
+    int flight_id;
+    int found = 0;
+    char response[BUFFER_SIZE];  // 用于存储响应内容
+    memset(response, 0, BUFFER_SIZE);
+
+    // 从客户端请求中提取航班ID
+    sscanf(buffer, "QUERY_BAGGAGE %d", &flight_id);
+
+    // 遍历航班数组，查找匹配的航班ID
+    for (int i = 0; i < flight_count; i++) {
+        if (flights[i].flight_id == flight_id) {
+            found = 1;
+            // 返回该航班的行李可用空间
+            sprintf(response, "Flight ID: %d\nBaggage space available: %d\n", 
+                    flights[i].flight_id, flights[i].baggage_availability);
+            break;
+        }
+    }
+
+    // 如果没有找到匹配的航班，返回错误消息
+    if (!found) {
+        strcpy(response, "Flight not found.\n");
+    }
+
+    // 将结果发送回客户端
+    sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+}

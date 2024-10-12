@@ -48,7 +48,7 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buff
 void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *buffer);
-
+void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 // 线程池头文件
 void thread_pool_init(int num_threads);
 void thread_pool_add_task(void (*function)(void *), void *arg);
