@@ -1,5 +1,5 @@
 // 线程池管理
-// thread pool
+// thread pool.c
 #include "server.h"
 #include <stdio.h>
 #include <stdlib.h>

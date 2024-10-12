@@ -1,18 +1,11 @@
-# SC6103_DS
-due 2024.10.16 code + report
-
-due 2024.10.19 demonstration
-
-next meeting: 10.12 after DS class
-
-## A Distributed Flight Information System
+# SC6103_DS: A Distributed Flight Information System
  - CS Architecture
  - UDP sockets
 ![CS Communication Flow](cs-communication-flow.png)
 
-### Server
+## Server
 
-#### store the information of all flights
+### store the information of all flights
 ```
 flight:
 {
@@ -20,21 +13,31 @@ flight:
     source_place: variable-length str
     destination_place: variable-length str
     departure_time: {
-        year
-        month
-        day
-        hour
-        minute
+        year: int
+        month: int
+        day: int
+        hour: int
+        minute: int
     }
     airfare: float
     seat_availability: int // num of seats available
     meal_option: variable-length str 固定几个选项
+        "Standard Meal",
+        "Vegetarian Meal",
+        "Seafood Meal",
+        "Child Meal",
+        "Halal Meal",
+        "Diabetic Meal"
     baggage_weight: float 固定几个等级
+        20.0,
+        30.0,
+        40.0,
+        -1.0
 }
 ```
 
 
-#### implement services on the flights for remote access by clients
+### implement services on the flights for remote access by clients
 ```
 1. query_flight_id (source_place, destination_place) {
     if multiple flights match:
@@ -43,24 +46,23 @@ flight:
         return an error message
 }
 
-2. query_departure_time (flight_id)
-    query_airfare (flight_id)
-    query_seat_availability (flight_id)
+2. query_flight_info (flight_id) {
     if flight_id does not exist:
         return an error message
+    else:
+        return departure_time, airfare, seat_availability
+}
 
 3. make_seat_reservation (flight_id, num_seats) {
     if successful reservation:
         return acknowledgement to client
         update seat_availability on server 
-    if incorrect user input (flight_id does not exist or insufficient available for num_seats):
+    if flight_id does not exist or insufficient available for num_seats:
         return an error message
 }
 
 4. [idempotent] select_meal (flight_id, meal_option) {
-    if flight_id does not exist:
-        return an error message
-    if meal_option is unavailable:
+    if flight_id does not exist or meal_option is unavailable:
         return an error message
     if meal_option is already selected by this client:
         return acknowledgement to client
@@ -70,9 +72,7 @@ flight:
 }
 
 5. [non-idempotent] add_extra_baggage (flight_id, baggage_weight) {
-    if flight_id does not exist:
-        return an error message
-    if baggage_weight exceeds maximum allowable weight:
+    if flight_id does not exist or baggage_weight exceeds maximum allowable weight:
         return an error message
     if baggage_weight is within allowable limits:
         add baggage_weight to the total baggage for this flight
@@ -80,44 +80,96 @@ flight:
         return acknowledgement
 }
 
-6. callback (server & client): monitor_seat_availability (main pre content)
+6. callback
+    client:
+        public interface Callback extends Remote {
+            void update_seat_availability (flight_id, seat_availability) throws RemoteException;
+        }
+    server: 多线程能够处理多个client的同时更新
+        public interface Monitor extends Remote {
+            void register (Callback cbObject, flight_id, monitor_interval) throws RemoteException {
+                record the server_address & port_number;
+                if monitor_interval expire then remove the client record;
+            }
+            void deregister (Callback cbObject) throws RemoteException;
+        }
 
-7. create a new thread to serve each request received
 
-8. The client address is obtained by the server
-when it receives a request from a client.
+7. create a new thread to serve each request received, and record the client address & port when it receives the request.
+
+8. The received requests and the produced replies should be
+printed on the screen.
 ```
 
 
-### Client
-1. provide an interface that repeatedly asks the user to enter a request and sends the request to the server
+## Client
+1. provide an interface that repeatedly asks the user to enter a request and sends the request to the server (client & user - rolling)
  
 2. include an option for the user to terminate the client
 
 3. already know the server address and port number
 
-4. Message
-    1. self-design format
-    2. transmit in byte array
-        - marshaling (int / float / str)
-        - unmarshalling
+4. Each reply or error message returned from the server should be printed on the screen.
+
+5. GUI
+
+
+## Message
+1. request-reply message structure
+    - message_type: int, 1 Byte
+        - 0xxx xxxx request
+            - 0xxx 0 register
+            - 0xxx 1 query_flight_id
+            - 0xxx 2 query_flight_info
+            - 0xxx 3 make_seat_reservation
+            - 0xxx 4 select_meal
+            - 0xxx 5 add_extra_baggage
+        - 1xxx xxxx reply 同上顺序
+    - request_id: int, 4 Bytes
+        - client_id
+            - client_addr
+            - client_port
+        - user_id
+    - data_length: int, 4 Bytes
+    - data
+        - int: 4 Bytes
+        - float: 4 Bytes
+        - variable-length str
+            - str_length: 4 Bytes
+            - str_content: 1 Byte for 1 character
+2. marshaling & unmarshalling
 ```
  #include <netinet/in.h>
  uint32_t htonl(uint32_t hostlong);
  uint32_t ntohl(uint32_t netlong);
 ```
+3. fault-tolerance
+    - at-least-once
+        - server: re-execute
+        - client: timeout
+    - at-most-once
+        - server: store history + filter duplicate + re-reply
+        - client: timeout
+4. Which semantics to use can be specified as an argument in the command that starts the client/server
 
 
-## Meeting Notes
-### 2024.10.06
- 1. task decomposition and distribution
+
+## Database
+
+
+# Meeting Notes
+## 2024.10.06 19:00
+ 1. due
+    - 2024.10.16 code + report
+    - 2024.10.19 demonstration
+ 2. task decomposition and distribution
     - server side (C) - Gaohan & Ziling
     - client side (Java) - Fanhui & Shuangyue
- 2. customized function determination
+ 3. customized function determination
     - idempotent: choose meal
     - non-idempotent: buy VIP lounge or other additional services
 
-### 2024.10.12
+## 2024.10.12 after DS class
 
 
 **1. 网络接口编程的介绍**

@@ -9,10 +9,12 @@ import java.util.*;
 import SC6103_DS.src.client_java.*;
 
 
-public class UDPClient {
-    private static final String server_address = "";
-    private static final int port_number = "";
+public class Client {
+
+    private static final String server_addr = "";
+    private static final int server_port = "";
     private static Callback callback;
+
 
     public static void main(String[] args) {
         // DatagramSocket aSocket = null;
@@ -34,9 +36,9 @@ public class UDPClient {
 
             //InetAddress serverAddress = InetAddress.getByName(server_address);
             //String server_address = server_address;
-            InetAddress serverInetAddress = InetAddress.getByName(server_address);
-            callback = new Callback(serverInetAddress, port_number); // 初始化回调处理器
-            runClient(serverInetAddress, port_number);
+            InetAddress serverInetAddress = InetAddress.getByName(server_addr);
+            callback = new Callback(serverInetAddress, server_port); // 初始化回调处理器
+            runClient(serverInetAddress, server_port);
         } catch (Exception e) {
             e.printStackTrace(); // 打印异常堆栈信息
             System.out.println("Error initializing UDPClient"); // 输出错误信息
@@ -49,7 +51,7 @@ public class UDPClient {
     }
 
      // 运行客户端逻辑
-    public static void runClient(InetAddress serverInetAddress, int port_number) {
+    public static void runClient(InetAddress serverInetAddress, int server_port) {
         try (Scanner scanner = new Scanner(System.in)) {
             UDPUtils udpUtils = new UDPUtils(); // 初始化 UDP 工具类
 
@@ -64,7 +66,7 @@ public class UDPClient {
                         System.out.print("Enter destination place: ");
                         String destination = scanner.nextLine();
                         String queryMessage = "QUERY_FLIGHT " + source + " " + destination;
-                        udpUtils.sendMessage(queryMessage, serverInetAddress, port_number); // 发送查询消息
+                        udpUtils.sendMessage(queryMessage, serverInetAddress, server_port); // 发送查询消息
                         String response = udpUtils.receiveMessage(); // 接收响应消息
                         System.out.println("Server response: " + response);
                         break;
@@ -81,7 +83,7 @@ public class UDPClient {
                         System.out.print("Enter meal option: ");
                         String mealOption = scanner.nextLine();
                         String mealMessage = "SELECT_MEAL " + mealFlightId + " " + mealOption;
-                        udpUtils.sendMessage(mealMessage, serverInetAddress, port_number); // 发送餐饮选择请求
+                        udpUtils.sendMessage(mealMessage, serverInetAddress, server_port); // 发送餐饮选择请求
                         String mealResponse = udpUtils.receiveMessage();
                         System.out.println("Server response: " + mealResponse);
                         break;
@@ -89,7 +91,7 @@ public class UDPClient {
                         System.out.print("Enter flight ID to purchase baggage survey service for: ");
                         int baggageFlightId = Integer.parseInt(scanner.nextLine());
                         String baggageMessage = "baggage_weight " + baggageFlightId;
-                        udpUtils.sendMessage(baggageMessage, serverInetAddress, port_number); // 发送 VIP 购买请求
+                        udpUtils.sendMessage(baggageMessage, serverInetAddress, server_port); // 发送 VIP 购买请求
                         String baggageResponse = udpUtils.receiveMessage();
                         System.out.println("Server response: " + baggageResponse);
                         break;
