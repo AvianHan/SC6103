@@ -63,6 +63,7 @@
     "server.h": "c",
     "ws2tcpip.h": "c",
     "unistd.h": "c",
-    "pthread.h": "c"
+    "pthread.h": "c",
+    "stdlib.h": "c"
   }
 }

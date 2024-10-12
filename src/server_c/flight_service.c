@@ -1,5 +1,5 @@
 // 航班相关服务实现
-// flight service
+// flight service.c
 #include "server.h"
 #include <stdio.h>
 #include <string.h>
@@ -34,8 +34,9 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buff
 
     for (int i = 0; i < flight_count; i++) {
         if (strcmp(flights[i].source_place, source) == 0 && strcmp(flights[i].destination_place, destination) == 0) {
-            char flight_info[100];
-            sprintf(flight_info, "Flight ID: %d\n", flights[i].flight_id);
+            char flight_info[200];
+            sprintf(flight_info, "Flight ID: %d\nMeal Option: %s\nBaggage Weight: %.2f kg\n",
+                    flights[i].flight_id, flights[i].meal_option, flights[i].baggage_weight);
             strcat(response, flight_info);
         }
     }
@@ -62,11 +63,12 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buf
     int found = 0;
     for (int i = 0; i < flight_count; i++) {
         if (flights[i].flight_id == flight_id) {
-            sprintf(response, "Flight ID: %d\nSource: %s\nDestination: %s\nDeparture Time: %d-%02d-%02d %02d:%02d\nAirfare: %.2f\nAvailable Seats: %d\n",
+            sprintf(response, "Flight ID: %d\nSource: %s\nDestination: %s\nDeparture Time: %d-%02d-%02d %02d:%02d\nAirfare: %.2f\nAvailable Seats: %d\nMeal Option: %s\nBaggage Weight: %.2f kg\n",
                     flights[i].flight_id, flights[i].source_place, flights[i].destination_place,
                     flights[i].departure_time.year, flights[i].departure_time.month, flights[i].departure_time.day,
                     flights[i].departure_time.hour, flights[i].departure_time.minute,
-                    flights[i].airfare, flights[i].seat_availability);
+                    flights[i].airfare, flights[i].seat_availability,
+                    flights[i].meal_option, flights[i].baggage_weight);
             found = 1;
             break;
         }
