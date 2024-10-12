@@ -36,8 +36,17 @@ void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *bu
     char command[20];
     sscanf(buffer, "%s", command);
 
+    uint32_t flight_data_length;
+    // 通过 unmarshall 解析出 Flight 结构体
+    Flight* flight = unmarshal_flight((uint8_t*)(buffer + strlen(command) + 1), &flight_data_length);
+
     if (strcmp(command, "QUERY_FLIGHT") == 0) {
-        handle_query_flight(sockfd, client_addr, buffer);
+        // 提取航班的出发地和目的地
+        char* source = flight->source_place;
+        char* destination = flight->destination_place;
+        handle_query_flight(sockfd, client_addr, source, destination);
+        free(flight->source_place);
+        free(flight->destination_place);
     } else if (strcmp(command, "QUERY_FLIGHT_ID") == 0) {
         handle_query_details(sockfd, client_addr, buffer);
     } else if (strcmp(command, "RESERVE") == 0) {
@@ -54,7 +63,8 @@ void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *bu
         char error_msg[BUFFER_SIZE];
         strcpy(error_msg, "Invalid command");
         sendto(sockfd, error_msg, strlen(error_msg), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-    }
+    }    
+    free(flight);  // 释放 Flight 结构体的内存
 }
 
 // 注册客户端监控航班

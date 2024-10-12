@@ -28,8 +28,7 @@ const char *months[] = {
 };
 
 // 处理航班查询请求（通过出发地和目的地）
-void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
-    char source[50], destination[50];
+void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *source, char *destination) {
     int found = 0;
     
     // 动态分配内存给 response
@@ -40,9 +39,6 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buff
     }
     int response_size = BUFFER_SIZE;
     memset(response, 0, response_size);
-
-    // 从客户端请求中提取出发地和目的地
-    sscanf(buffer, "QUERY_FLIGHT %s %s", source, destination);
 
     // 遍历航班数组，查找匹配的出发地和目的地
     for (int i = 0; i < flight_count; i++) {
