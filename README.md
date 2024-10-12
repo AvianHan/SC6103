@@ -36,11 +36,12 @@ flight:
         return an error message
 }
 
-2. query_departure_time (flight_id)
-    query_airfare (flight_id)
-    query_seat_availability (flight_id)
+2. query_flight_info (flight_id) {
     if flight_id does not exist:
         return an error message
+    else:
+        return departure_time, airfare, seat_availability
+}
 
 3. make_seat_reservation (flight_id, num_seats) {
     if successful reservation:
@@ -126,9 +127,7 @@ printed on the screen.
         - variable-length str
             - str_length: 4 Bytes
             - str_content: 1 Byte for 1 character
-2. transmit in byte array
-    - marshaling (int / float / str)
-    - unmarshalling
+2. marshaling & unmarshalling
 ```
  #include <netinet/in.h>
  uint32_t htonl(uint32_t hostlong);
