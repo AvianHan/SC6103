@@ -12,7 +12,7 @@
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 #endif
-#include "head.h"
+#include "server.h"
 
 #define PORT 8080
 #define BUFFER_SIZE 1024
@@ -30,12 +30,17 @@ int main() {
 
     int sockfd;
     struct sockaddr_in server_addr, client_addr;
-    char buffer[BUFFER_SIZE];
+    char *buffer = (char *)malloc(BUFFER_SIZE * sizeof(char));
+    if (buffer == NULL) {
+        perror("Memory allocation failed");
+        exit(EXIT_FAILURE);
+    }
     socklen_t addr_len = sizeof(client_addr);
 
     // 创建UDP套接字
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("Socket creation failed");
+        free(buffer);
         exit(EXIT_FAILURE);
     }
 
@@ -49,6 +54,7 @@ int main() {
     if (bind(sockfd, (const struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
         perror("Bind failed");
         close(sockfd);
+        free(buffer);
         exit(EXIT_FAILURE);
     }
 
@@ -74,6 +80,7 @@ int main() {
     #endif
 
     close(sockfd);
+    free(buffer);
     return 0;
 }
 
@@ -89,8 +96,13 @@ void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *bu
     } else if (strcmp(command, "RESERVE") == 0) {
         handle_reservation(sockfd, client_addr, buffer);
     } else {
-        char *error_msg = "Invalid command";
+        char *error_msg = (char *)malloc(BUFFER_SIZE * sizeof(char));
+        if (error_msg == NULL) {
+            perror("Memory allocation failed");
+            return;
+        }
+        strcpy(error_msg, "Invalid command");
         sendto(sockfd, error_msg, strlen(error_msg), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+        free(error_msg);
     }
 }
-// server

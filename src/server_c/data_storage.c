@@ -1,19 +1,26 @@
 // 航班数据存储与管理
 // data storage
-#include "head.h"
+#include "server.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#define MAX_FLIGHTS 100
-
-Flight flights[MAX_FLIGHTS];
+Flight *flights = NULL;
 int flight_count = 0;
+int max_flights = 0;
 
 // 初始化航班信息
-void initialize_flights() {
+void initialize_flights(int initial_capacity) {
+    max_flights = initial_capacity;
+    flights = (Flight *)malloc(max_flights * sizeof(Flight));
+    if (flights == NULL) {
+        perror("Memory allocation failed");
+        exit(EXIT_FAILURE);
+    }
+
     // 示例航班数据
-    flights[0] = (Flight){1, "Singapore", "Tokyo", "2024-10-12 08:00", 500.0, 50};
-    flights[1] = (Flight){2, "Singapore", "New York", "2024-10-13 23:00", 1200.0, 30};
+    flights[0] = (Flight){1, strdup("Singapore"), strdup("Tokyo"), {2024, 10, 12, 8, 0}, 500.0, 50};
+    flights[1] = (Flight){2, strdup("Singapore"), strdup("New York"), {2024, 10, 13, 23, 0}, 1200.0, 30};
     flight_count = 2;
 }
 
@@ -31,8 +38,8 @@ Flight* find_flight_by_id(int flight_id) {
 int update_flight_seats(int flight_id, int seats) {
     Flight *flight = find_flight_by_id(flight_id);
     if (flight != NULL) {
-        if (flight->available_seats >= seats) {
-            flight->available_seats -= seats;
+        if (flight->seat_availability >= seats) {
+            flight->seat_availability -= seats;
             return 1; // 更新成功
         } else {
             return -1; // 座位不足
@@ -42,13 +49,35 @@ int update_flight_seats(int flight_id, int seats) {
 }
 
 // 添加新航班
-int add_flight(int flight_id, const char *source, const char *destination, const char *departure_time, float airfare, int available_seats) {
-    if (flight_count >= MAX_FLIGHTS) {
-        return -1; // 无法添加更多航班
+int add_flight(int flight_id, const char *source, const char *destination, DepartureTime departure_time, float airfare, int seat_availability) {
+    if (flight_count >= max_flights) {
+        max_flights *= 2;
+        flights = (Flight *)realloc(flights, max_flights * sizeof(Flight));
+        if (flights == NULL) {
+            perror("Memory reallocation failed");
+            return -1;
+        }
     }
-    flights[flight_count++] = (Flight){flight_id, "", "", "", airfare, available_seats};
-    strncpy(flights[flight_count - 1].source, source, sizeof(flights[flight_count - 1].source) - 1);
-    strncpy(flights[flight_count - 1].destination, destination, sizeof(flights[flight_count - 1].destination) - 1);
-    strncpy(flights[flight_count - 1].departure_time, departure_time, sizeof(flights[flight_count - 1].departure_time) - 1);
+
+    flights[flight_count].flight_id = flight_id;
+    flights[flight_count].source_place = strdup(source);
+    flights[flight_count].destination_place = strdup(destination);
+    flights[flight_count].departure_time = departure_time;
+    flights[flight_count].airfare = airfare;
+    flights[flight_count].seat_availability = seat_availability;
+    flight_count++;
+
     return 1; // 添加成功
+}
+
+// 清理航班信息
+void cleanup_flights() {
+    if (flights != NULL) {
+        for (int i = 0; i < flight_count; i++) {
+            free(flights[i].source_place);
+            free(flights[i].destination_place);
+        }
+        free(flights);
+        flights = NULL;
+    }
 }

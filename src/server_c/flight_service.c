@@ -1,16 +1,13 @@
 // 航班相关服务实现
 // flight service
-#include "head.h"
+#include "server.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 #ifdef __linux__
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <sys/socket.h>
-#ifdef __linux__
-#include <netinet/in.h>
-#endif
 #include <sys/socket.h>
 #elif _WIN32
 #include <winsock2.h>
@@ -20,17 +17,7 @@
 
 #define BUFFER_SIZE 1024
 
-// 定义 Flight 结构体
-typedef struct {
-    int flight_id;
-    char source[50];
-    char destination[50];
-    char departure_time[20];
-    float airfare;
-    int available_seats;
-} Flight;
-
-extern Flight flights[];
+extern Flight *flights;
 extern int flight_count;
 
 // 处理航班查询请求（通过出发地和目的地）
@@ -38,9 +25,15 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buff
     char source[50], destination[50];
     sscanf(buffer, "QUERY_FLIGHT %s %s", source, destination);
 
-    char response[BUFFER_SIZE] = "";
+    char *response = (char *)malloc(BUFFER_SIZE * sizeof(char));
+    if (response == NULL) {
+        perror("Memory allocation failed");
+        return;
+    }
+    response[0] = '\0';
+
     for (int i = 0; i < flight_count; i++) {
-        if (strcmp(flights[i].source, source) == 0 && strcmp(flights[i].destination, destination) == 0) {
+        if (strcmp(flights[i].source_place, source) == 0 && strcmp(flights[i].destination_place, destination) == 0) {
             char flight_info[100];
             sprintf(flight_info, "Flight ID: %d\n", flights[i].flight_id);
             strcat(response, flight_info);
@@ -52,6 +45,7 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buff
     }
 
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+    free(response);
 }
 
 // 处理航班详细信息查询请求（通过航班ID）
@@ -59,12 +53,20 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buf
     int flight_id;
     sscanf(buffer, "QUERY_DETAILS %d", &flight_id);
 
-    char response[BUFFER_SIZE];
+    char *response = (char *)malloc(BUFFER_SIZE * sizeof(char));
+    if (response == NULL) {
+        perror("Memory allocation failed");
+        return;
+    }
+
     int found = 0;
     for (int i = 0; i < flight_count; i++) {
         if (flights[i].flight_id == flight_id) {
-            sprintf(response, "Flight ID: %d\nSource: %s\nDestination: %s\nDeparture Time: %s\nAirfare: %.2f\nAvailable Seats: %d\n",
-                    flights[i].flight_id, flights[i].source, flights[i].destination, flights[i].departure_time, flights[i].airfare, flights[i].available_seats);
+            sprintf(response, "Flight ID: %d\nSource: %s\nDestination: %s\nDeparture Time: %d-%02d-%02d %02d:%02d\nAirfare: %.2f\nAvailable Seats: %d\n",
+                    flights[i].flight_id, flights[i].source_place, flights[i].destination_place,
+                    flights[i].departure_time.year, flights[i].departure_time.month, flights[i].departure_time.day,
+                    flights[i].departure_time.hour, flights[i].departure_time.minute,
+                    flights[i].airfare, flights[i].seat_availability);
             found = 1;
             break;
         }
@@ -75,6 +77,7 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buf
     }
 
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+    free(response);
 }
 
 // 处理航班座位预订请求
@@ -82,13 +85,18 @@ void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffe
     int flight_id, seats;
     sscanf(buffer, "RESERVE %d %d", &flight_id, &seats);
 
-    char response[BUFFER_SIZE];
+    char *response = (char *)malloc(BUFFER_SIZE * sizeof(char));
+    if (response == NULL) {
+        perror("Memory allocation failed");
+        return;
+    }
+
     int found = 0;
     for (int i = 0; i < flight_count; i++) {
         if (flights[i].flight_id == flight_id) {
-            if (flights[i].available_seats >= seats) {
-                flights[i].available_seats -= seats;
-                sprintf(response, "Reservation successful. Remaining seats: %d\n", flights[i].available_seats);
+            if (flights[i].seat_availability >= seats) {
+                flights[i].seat_availability -= seats;
+                sprintf(response, "Reservation successful. Remaining seats: %d\n", flights[i].seat_availability);
             } else {
                 strcpy(response, "Not enough available seats");
             }
@@ -102,4 +110,5 @@ void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffe
     }
 
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+    free(response);
 }
