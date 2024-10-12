@@ -2,92 +2,84 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Marshal an integer to network byte order
-uint32_t marshal_int(uint32_t value) {
-    return htonl(value); 
+// Marshal an integer to a byte array (4 bytes)
+uint8_t* marshal_int(int value) {
+    uint32_t network_value = htonl(value);
+    uint8_t* buffer = malloc(4);
+    memcpy(buffer, &network_value, 4);
+    return buffer;
 }
 
-// Unmarshal an integer from network byte order
-uint32_t unmarshal_int(uint32_t value) {
-    return ntohl(value);
+// Marshal a float to a byte array (4 bytes)
+uint8_t* marshal_float(float value) {
+    uint32_t* int_rep = (uint32_t*)&value;
+    uint32_t network_value = htonl(*int_rep);
+    uint8_t* buffer = malloc(4);
+    memcpy(buffer, &network_value, 4);
+    return buffer;
 }
 
-// Marshal a float to network byte order
-float marshal_float(float value) {
-    uint32_t* int_ptr = (uint32_t*)&value;
-    uint32_t int_value = htonl(*int_ptr);
-    return *(float*)&int_value;
-}
-
-// Unmarshal a float from network byte order
-float unmarshal_float(float value) {
-    uint32_t* int_ptr = (uint32_t*)&value;
-    uint32_t int_value = ntohl(*int_ptr);
-    return *(float*)&int_value;
-}
-
-// Marshal a string with a 4-byte length prefix
+// Marshal a string with length prefix
 uint8_t* marshal_string(const char* str, uint32_t* out_length) {
-    uint32_t str_length = strlen(str);
-    *out_length = 4 + str_length;
+    uint32_t str_len = strlen(str);
+    *out_length = 4 + str_len;
+    uint8_t* buffer = malloc(*out_length);
 
-    uint8_t* result = malloc(*out_length);
-    uint32_t net_length = htonl(str_length);
-    memcpy(result, &net_length, 4); 
-    memcpy(result + 4, str, str_length);
-
-    return result;
+    uint32_t network_len = htonl(str_len);
+    memcpy(buffer, &network_len, 4);
+    memcpy(buffer + 4, str, str_len);
+    return buffer;
 }
 
-// Unmarshal a string with a 4-byte length prefix
-char* unmarshal_string(const uint8_t* data, uint32_t* length) {
-    *length = ntohl(*(uint32_t*)data); 
-    char* str = malloc(*length + 1);   
-    memcpy(str, data + 4, *length);
-    str[*length] = '\0';              
+// Marshal a DepartureTime structure
+uint8_t* marshal_departure_time(const DepartureTime* departure, uint32_t* out_length) {
+    *out_length = 5 * 4;
+    uint8_t* buffer = malloc(*out_length);
 
-    return str;
+    memcpy(buffer, marshal_int(departure->year), 4);
+    memcpy(buffer + 4, marshal_int(departure->month), 4);
+    memcpy(buffer + 8, marshal_int(departure->day), 4);
+    memcpy(buffer + 12, marshal_int(departure->hour), 4);
+    memcpy(buffer + 16, marshal_int(departure->minute), 4);
+
+    return buffer;
 }
 
-// Marshal a Flight structure into a byte array
+// Marshal a Flight structure
 uint8_t* marshal_flight(const Flight* flight, uint32_t* out_length) {
-    uint32_t source_len, dest_len;
+    uint32_t source_len, dest_len, time_len;
     uint8_t* source = marshal_string(flight->source_place, &source_len);
     uint8_t* dest = marshal_string(flight->destination_place, &dest_len);
+    uint8_t* time = marshal_departure_time(flight->departure_time, &time_len);
 
-    *out_length = 4 + source_len + dest_len + 5 * 4 + 4 + 4 + 4;
+    *out_length = 4 + source_len + dest_len + time_len + 4 + 4 + 4;
+    uint8_t* buffer = malloc(*out_length);
 
-    uint8_t* result = malloc(*out_length);
     uint32_t offset = 0;
-
-    memcpy(result + offset, &htonl(flight->flight_id), 4);
-    offset += 4;
-    memcpy(result + offset, source, source_len);
-    offset += source_len;
-    memcpy(result + offset, dest, dest_len);
-    offset += dest_len;
-
-    memcpy(result + offset, &htonl(flight->year), 4);
-    offset += 4;
-    memcpy(result + offset, &htonl(flight->month), 4);
-    offset += 4;
-    memcpy(result + offset, &htonl(flight->day), 4);
-    offset += 4;
-    memcpy(result + offset, &htonl(flight->hour), 4);
-    offset += 4;
-    memcpy(result + offset, &htonl(flight->minute), 4);
-    offset += 4;
-
-    uint32_t float_as_int = htonl(*(uint32_t*)&flight->airfare);
-    memcpy(result + offset, &float_as_int, 4);
-    offset += 4;
-
-    memcpy(result + offset, &htonl(flight->seat_availability), 4);
-    offset += 4;
-    memcpy(result + offset, &htonl(flight->baggage_availability), 4);
+    memcpy(buffer + offset, marshal_int(flight->flight_id), 4); offset += 4;
+    memcpy(buffer + offset, source, source_len); offset += source_len;
+    memcpy(buffer + offset, dest, dest_len); offset += dest_len;
+    memcpy(buffer + offset, time, time_len); offset += time_len;
+    memcpy(buffer + offset, marshal_float(flight->airfare), 4); offset += 4;
+    memcpy(buffer + offset, marshal_int(flight->seat_availability), 4); offset += 4;
+    memcpy(buffer + offset, marshal_int(flight->baggage_availability), 4);
 
     free(source);
     free(dest);
+    free(time);
 
-    return result;
+    return buffer;
+}
+
+// Marshal a Message structure
+uint8_t* marshal_message(const Message* message, uint32_t* out_length) {
+    *out_length = 1 + 4 + 4 + message->data_length;
+    uint8_t* buffer = malloc(*out_length);
+
+    buffer[0] = message->message_type;
+    memcpy(buffer + 1, marshal_int(message->request_id), 4);
+    memcpy(buffer + 5, marshal_int(message->data_length), 4);
+    memcpy(buffer + 9, message->data, message->data_length);
+
+    return buffer;
 }

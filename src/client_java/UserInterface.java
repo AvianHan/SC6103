@@ -1,10 +1,10 @@
 package SC6103_DS.src.client_java;
 
 import java.util.Scanner;
-import SC6103_DS.src.communication.Marshalling;
+
 import SC6103_DS.src.communication.Message;
-import SC6103_DS.src.communication.Message.Flight;
-import SC6103_DS.src.communication.Message.MessageStructure;
+import SC6103_DS.src.communication.Marshalling;
+import SC6103_DS.src.communication.Unmarshalling;
 
 public class UserInterface {
     private Scanner scanner;

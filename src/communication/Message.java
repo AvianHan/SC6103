@@ -51,13 +51,13 @@ public class Message {
     }
 
     // Message fields
-    public byte messageType;
+    public int messageType;
     public int requestId;
     public int dataLength;
     public byte[] data;
 
     // Constructor for Message class with direct byte array data
-    public Message(byte messageType, int requestId, int dataLength, byte[] data) {
+    public Message(int messageType, int requestId, int dataLength, byte[] data) {
         this.messageType = messageType;
         this.requestId = requestId;
         this.dataLength = dataLength;
@@ -65,7 +65,7 @@ public class Message {
     }
 
     // Constructor for Message class with Flight object data
-    public Message(byte messageType, int requestId, Flight flightData) {
+    public Message(int messageType, int requestId, Flight flightData) {
         this.messageType = messageType;
         this.requestId = requestId;
         this.data = Marshalling.marshalFlight(flightData);

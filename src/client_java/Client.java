@@ -5,10 +5,9 @@ import java.io.*;
 import java.util.*;
 import SC6103_DS.src.client_java.*;
 // import SC6103_DS.src.communication.*;
-import SC6103_DS.src.communication.Marshalling;
 import SC6103_DS.src.communication.Message;
-import SC6103_DS.src.communication.Message.Flight;
-import SC6103_DS.src.communication.Message.MessageStructure;
+import SC6103_DS.src.communication.Marshalling;
+import SC6103_DS.src.communication.Unmarshalling;
 
 public class Client {
 
@@ -30,7 +29,7 @@ public class Client {
     // Run client logic
     public static void runClient(InetAddress serverInetAddress, int server_port) {
         try (Scanner scanner = new Scanner(System.in)) {
-            UDPUtils udpUtils = new UDPUtils(); // Initialize UDP utility class
+            Utils udpUtils = new Utils(); // Initialize UDP utility class
 
             while (true) {
                 displayMenu(); // Display user menu

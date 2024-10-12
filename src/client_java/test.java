@@ -16,7 +16,7 @@ public static void main(String[] args) {
 // 运行客户端逻辑
 public static void runClient(String serverAddress, int serverPort) {
     try (Scanner scanner = new Scanner(System.in)) {
-        UDPUtils udpUtils = new UDPUtils(); // 初始化 UDP 工具类
+        Utils udpUtils = new Utils(); // 初始化 UDP 工具类
 
         while (true) {
             displayMenu(); // 显示用户菜单
