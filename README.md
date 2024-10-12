@@ -85,7 +85,76 @@ flight:
 8. The received requests and the produced replies should be
 printed on the screen.
 ```
-### Database
+
+## Client
+1. provide an interface that repeatedly asks the user to enter a request and sends the request to the server (client & user - rolling)
+ 
+2. include an option for the user to terminate the client
+
+3. already know the server address and port number
+
+4. Each reply or error message returned from the server should be printed on the screen.
+
+5. GUI
+
+
+## Message
+1. request-reply message structure
+    - message_type: int, 1 Byte
+        - 0xxx xxxx request
+            - 0xxx 0 register
+            - 0xxx 1 query_flight_id
+            - 0xxx 2 query_flight_info
+            - 0xxx 3 make_seat_reservation
+            - 0xxx 4 query_baggage_availability
+            - 0xxx 5 add_baggage
+        - 1xxx xxxx reply 同上顺序
+    - request_id: int, 4 Bytes
+        - client_id
+            - client_addr
+            - client_port
+        - unique_identifier
+    - data_length: int, 4 Bytes
+    - data: flight
+        - int: 4 Bytes
+        - float: 4 Bytes
+        - variable-length str
+            - str_length: 4 Bytes
+            - str_content: 1 Byte for 1 character
+2. marshaling & unmarshalling
+```
+ #include <netinet/in.h>
+ uint32_t htonl(uint32_t hostlong);
+ uint32_t ntohl(uint32_t netlong);
+```
+3. fault-tolerance
+    - at-least-once
+        - server: re-execute
+        - client: timeout
+    - at-most-once
+        - server: store history + filter duplicate + re-reply
+        - client: timeout
+4. Which semantics to use can be specified as an argument in the command that starts the client/server
+
+
+
+# Meeting Notes
+## 2024.10.06 19:00
+ 1. due
+    - 2024.10.16 code + report
+    - 2024.10.19 demonstration
+ 2. task decomposition and distribution
+    - server side (C) - Gaohan & Ziling
+    - client side (Java) - Fanhui & Shuangyue
+ 3. customized function determination
+    - idempotent: choose meal
+    - non-idempotent: buy VIP lounge or other additional services
+
+## 2024.10.12 after DS class
+
+
+
+## Database
 	CREATE DATABASE flight_system;
  ![image](https://github.com/user-attachments/assets/854a87a7-0e3b-49f4-be92-21ceb1656626)
  
@@ -154,72 +223,6 @@ printed on the screen.
 ### 总结：
 这段代码让服务器可以在启动时根据用户选择的参数来切换不同的容错机制。通过 at-least-once 机制，服务器会每次重新执行请求，而通过 at-most-once 机制，服务器会避免处理重复请求。
 
-
-## Client
-1. provide an interface that repeatedly asks the user to enter a request and sends the request to the server (client & user - rolling)
- 
-2. include an option for the user to terminate the client
-
-3. already know the server address and port number
-
-4. Each reply or error message returned from the server should be printed on the screen.
-
-5. GUI
-
-
-## Message
-1. request-reply message structure
-    - message_type: int, 1 Byte
-        - 0xxx xxxx request
-            - 0xxx 0 register
-            - 0xxx 1 query_flight_id
-            - 0xxx 2 query_flight_info
-            - 0xxx 3 make_seat_reservation
-            - 0xxx 4 query_baggage_availability
-            - 0xxx 5 add_baggage
-        - 1xxx xxxx reply 同上顺序
-    - request_id: int, 4 Bytes
-        - client_id
-            - client_addr
-            - client_port
-        - unique_identifier
-    - data_length: int, 4 Bytes
-    - data: flight
-        - int: 4 Bytes
-        - float: 4 Bytes
-        - variable-length str
-            - str_length: 4 Bytes
-            - str_content: 1 Byte for 1 character
-2. marshaling & unmarshalling
-```
- #include <netinet/in.h>
- uint32_t htonl(uint32_t hostlong);
- uint32_t ntohl(uint32_t netlong);
-```
-3. fault-tolerance
-    - at-least-once
-        - server: re-execute
-        - client: timeout
-    - at-most-once
-        - server: store history + filter duplicate + re-reply
-        - client: timeout
-4. Which semantics to use can be specified as an argument in the command that starts the client/server
-
-
-
-# Meeting Notes
-## 2024.10.06 19:00
- 1. due
-    - 2024.10.16 code + report
-    - 2024.10.19 demonstration
- 2. task decomposition and distribution
-    - server side (C) - Gaohan & Ziling
-    - client side (Java) - Fanhui & Shuangyue
- 3. customized function determination
-    - idempotent: choose meal
-    - non-idempotent: buy VIP lounge or other additional services
-
-## 2024.10.12 after DS class
 
 
 **1. 网络接口编程的介绍**
