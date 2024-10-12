@@ -125,31 +125,25 @@ printed on the screen.
 ### 容错策略选择：
 
 通过 use_at_least_once 标志来控制容错策略。在命令行启动服务器时，可以选择使用 at-least-once 或 at-most-once：
-bash
-复制代码
-./server at-least-once
-./server at-most-once
+	./server at-least-once
+	./server at-most-once
 服务器根据传入的参数来决定使用哪种容错机制。
-at-least-once 机制：
 
+### at-least-once 机制：
 每次请求都重新执行，不管该请求是否重复。
-at-most-once 机制：
-
+### at-most-once 机制：
 每次请求先检查历史记录，避免重复执行。如果发现该请求已经处理过，则直接返回缓存的响应。
-多线程支持：
 
+### 多线程支持：
 每次接收到请求时，创建新的线程来处理客户端请求。
-如何使用：
+
+### 如何使用：
 编译并运行服务器：
-bash
-复制代码
-gcc server.c -o server -lpthread
+	gcc server.c -o server -lpthread
 运行服务器并选择容错机制：
-bash
-复制代码
-./server at-least-once   # 使用 at-least-once 机制
-./server at-most-once    # 使用 at-most-once 机制
-总结：
+	./server at-least-once   # 使用 at-least-once 机制
+	./server at-most-once    # 使用 at-most-once 机制
+### 总结：
 这段代码让服务器可以在启动时根据用户选择的参数来切换不同的容错机制。通过 at-least-once 机制，服务器会每次重新执行请求，而通过 at-most-once 机制，服务器会避免处理重复请求。
 
 
