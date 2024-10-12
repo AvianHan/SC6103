@@ -16,6 +16,7 @@
 #endif
 
 #define BUFFER_SIZE 1024
+#define MAX_LUGGAGE 400
 
 extern Flight *flights;
 extern int flight_count;
@@ -130,35 +131,47 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buf
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 }
 
-// 处理航班座位预订请求
+// 座位预定函数
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
     int flight_id, seats;
+    int found = 0;
+    char response[BUFFER_SIZE];  // 用于存储响应内容
+    memset(response, 0, BUFFER_SIZE);
+
+    // 从客户端请求中提取航班ID
     sscanf(buffer, "RESERVE %d %d", &flight_id, &seats);
 
-    char *response = (char *)malloc(BUFFER_SIZE * sizeof(char));
-    if (response == NULL) {
-        perror("Memory allocation failed");
-        return;
-    }
-
-    int found = 0;
+    // 遍历航班数组，查找匹配的航班ID
     for (int i = 0; i < flight_count; i++) {
         if (flights[i].flight_id == flight_id) {
-            if (flights[i].seat_availability >= seats) {
-                flights[i].seat_availability -= seats;
-                sprintf(response, "Reservation successful. Remaining seats: %d\n", flights[i].seat_availability);
-            } else {
-                strcpy(response, "Not enough available seats");
-            }
             found = 1;
-            break;
+            // 检查是否有空余座位
+            if (flights[i].seat_availability == 0){
+                // 如果没有空余座位，返回错误消息
+                strcpy(response, "Reservation failed: No seats available.\n");
+            }
+            else if (flights[i].seat_availability < seats) {
+                // 如果没有空余座位，返回错误消息
+                strcpy(response, "Reservation failed: No enough seats available. Reduce your reservation.\n");
+                
+            } else {
+                // 预定座位，减少可用座位数量
+                flights[i].seat_availability -= seats;
+
+                // 返回预定确认消息
+                sprintf(response, "Reservation confirmed for Flight ID: %d\nSeats remaining: %d\n",
+                        flights[i].flight_id,
+                        flights[i].seat_availability);
+            }
+            break;  // 找到匹配的航班后退出循环
         }
     }
 
+    // 如果没有找到匹配的航班，返回错误消息
     if (!found) {
-        strcpy(response, "Flight not found");
+        strcpy(response, "Flight not found.\n");
     }
 
+    // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-    free(response);
 }
