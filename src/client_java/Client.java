@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import SC6103_DS.src.client_java.*;
+import SC6103_DS.communication.*;
 
 public class Client {
 
@@ -70,7 +71,7 @@ public class Client {
                         int flightId = Integer.parseInt(scanner.nextLine());
                         System.out.print("Enter monitor interval in seconds: ");
                         int monitorInterval = Integer.parseInt(scanner.nextLine());
-                        callback.startMonitoringSeatAvailability(flightId); // 开始监控
+                        callback.startMonitoringSeatAvailability(flightId, monitorInterval); // 开始监控
                         break;
                     case 3: // 选择餐饮（幂等操作）
                         System.out.print("Enter flight ID to select meal for: ");
