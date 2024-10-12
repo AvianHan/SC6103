@@ -1,5 +1,7 @@
 package SC6103_DS.src.client_java;
 
+import SC6103_DS.communication.*;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
