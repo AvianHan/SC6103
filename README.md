@@ -22,7 +22,17 @@ flight:
     airfare: float
     seat_availability: int // num of seats available
     meal_option: variable-length str 固定几个选项
+        "Standard Meal",
+        "Vegetarian Meal",
+        "Seafood Meal",
+        "Child Meal",
+        "Halal Meal",
+        "Diabetic Meal"
     baggage_weight: float 固定几个等级
+        20.0,
+        30.0,
+        40.0,
+        -1.0
 }
 ```
 
@@ -61,7 +71,7 @@ flight:
         return acknowledgement
 }
 
-5. [non-idempotent] add_extra_baggage (flight_id, baggage_weight) {
+5. [non-idempotent] add_extra_baggage (flight_id, baggage_weight, ) {
     if flight_id does not exist or baggage_weight exceeds maximum allowable weight:
         return an error message
     if baggage_weight is within allowable limits:
