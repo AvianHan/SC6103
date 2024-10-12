@@ -134,6 +134,13 @@ printed on the screen.
  uint32_t ntohl(uint32_t netlong);
 ```
 3. fault-tolerance
+    - at-least-once
+        - server: re-execute
+        - client: timeout
+    - at-most-once
+        - server: store history + filter duplicate + re-reply
+        - client: timeout
+4. Which semantics to use can be specified as an argument in the command that starts the client/server
 
 
 
