@@ -91,7 +91,7 @@ void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *bu
 
     if (strcmp(command, "QUERY_FLIGHT") == 0) {
         handle_query_flight(sockfd, client_addr, buffer);
-    } else if (strcmp(command, "QUERY_DETAILS") == 0) {
+    } else if (strcmp(command, "QUERY_FLIGHT_ID") == 0) {
         handle_query_details(sockfd, client_addr, buffer);
     } else if (strcmp(command, "RESERVE") == 0) {
         handle_reservation(sockfd, client_addr, buffer);
