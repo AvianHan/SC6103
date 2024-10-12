@@ -138,6 +138,9 @@ flight:
     - one non-idempotent VIP休息室+其他各类需求购买
 
 6. create a new thread to serve each request received
+
+7. The client address is obtained by the server
+when it receives a request from a client.
 ```
 
 要搭建该服务器，请按照以下步骤操作：
