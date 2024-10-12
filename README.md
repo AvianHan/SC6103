@@ -12,6 +12,47 @@ next meeting:
  - UDP sockets
 ![CS Communication Flow](cs-communication-flow.png)
 
+flight_booking_system/
+│
+├── client_java/
+│   ├── src/
+│   │   ├── com/
+│   │   │   ├── flightsystem/
+│   │   │   │   ├── Client.java                 # 客户端主程序
+│   │   │   │   ├── UserInterface.java          # 用户界面管理
+│   │   │   │   ├── MessageUtils.java           # 数据编组和解组工具类
+│   │   │   │   ├── CallbackHandler.java        # 处理回调的类
+│   │   │   │   └── UDPUtils.java               # UDP套接字工具类
+│   │   └── resources/
+│   │       └── config.properties               # 配置文件，存储服务器地址和端口等信息
+│   └── build.gradle                            # Gradle构建脚本
+│
+├── server/
+│   ├── server.c                                # 服务器主程序
+│   ├── flight_service.c                        # 航班相关服务实现
+│   ├── flight_service.h                        # 航班服务头文件
+│   ├── callback_handler.c                      # 处理回调的实现
+│   ├── callback_handler.h                      # 回调处理头文件
+│   ├── data_storage.c                          # 航班数据存储与管理
+│   ├── data_storage.h                          # 数据存储头文件
+│   ├── thread_pool.c                           # 线程池管理
+│   ├── thread_pool.h                           # 线程池头文件
+│   └── Makefile                                # 用于编译服务器代码的Makefile
+│
+├── common/
+│   ├── protocol.h                              # 通信协议头文件，定义请求类型、消息格式等
+│   ├── udp_utils.c                             # UDP套接字相关的通用工具函数
+│   ├── udp_utils.h                             # 套接字工具头文件
+│   └── Makefile                                # 用于编译通用模块的Makefile
+│
+├── docs/
+│   ├── README.md                               # 项目概述和使用说明
+│   ├── SYSTEM_ARCHITECTURE.md                  # 系统架构文档
+│   ├── CLIENT_GUIDE.md                         # 客户端使用指南
+│   └── SERVER_GUIDE.md                         # 服务器部署与运行指南
+│
+└── Makefile                                    # 顶层Makefile，用于编译整个项目
+
 ### Server
 
 #### store the information of all flights
