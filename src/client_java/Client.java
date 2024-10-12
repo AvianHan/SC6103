@@ -9,7 +9,7 @@ import SC6103_DS.src.communication.*;
 public class Client {
 
     private static final String server_addr = "192.168.200.1";
-    private static final int server_port = "8080";
+    private static final int server_port = 8080;
     private static Callback callback;
 
     public static void main(String[] args) {
