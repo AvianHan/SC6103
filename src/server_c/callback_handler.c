@@ -14,7 +14,7 @@
 #endif
 #include <pthread.h>
 #include "server.h"
-#include "handler.h"
+
 
 #define BUFFER_SIZE 1024
 

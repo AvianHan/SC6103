@@ -36,6 +36,7 @@ typedef struct {
 
 // 回调处理头文件
 void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_id, int monitor_interval);
+void* monitor_flights(void* arg);
 
 // 数据存储头文件
 void initialize_flights();
