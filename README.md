@@ -85,6 +85,13 @@ flight:
 8. The received requests and the produced replies should be
 printed on the screen.
 ```
+### Database
+	CREATE DATABASE flight_system;
+ ![image](https://github.com/user-attachments/assets/854a87a7-0e3b-49f4-be92-21ceb1656626)
+	USE flight_system;
+ ![image](https://github.com/user-attachments/assets/7d17ed79-2d3c-47f4-9caf-17a4f49a7200)
+ 	
+
 
 
 ## Client
