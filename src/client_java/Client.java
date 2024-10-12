@@ -4,7 +4,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import SC6103_DS.src.client_java.*;
-import SC6103_DS.communication.*;
+import SC6103_DS.src.communication.*;
 
 public class Client {
 
