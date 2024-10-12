@@ -1,5 +1,5 @@
 // 航班相关服务实现
-// flight service.c
+// flight_service.c
 #include "server.h"
 #include <stdio.h>
 #include <string.h>
@@ -16,6 +16,7 @@
 #endif
 
 #define BUFFER_SIZE 1024
+#define MAX_LUGGAGE 400
 
 extern Flight *flights;
 extern int flight_count;
@@ -37,6 +38,7 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buff
         perror("Memory allocation failed");
         return;
     }
+    int response_size = BUFFER_SIZE;
     memset(response, 0, response_size);
 
     // 从客户端请求中提取出发地和目的地
@@ -46,8 +48,8 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buff
     for (int i = 0; i < flight_count; i++) {
         if (strcmp(flights[i].source_place, source) == 0 && strcmp(flights[i].destination_place, destination) == 0) {
             char flight_info[200];
-            sprintf(flight_info, "Flight ID: %d\nMeal Option: %s\nBaggage Weight: %.2f kg\n",
-                    flights[i].flight_id, flights[i].meal_option, flights[i].baggage_weight);
+            sprintf(flight_info, "Flight ID: %d\nBaggage Availability: %d kg\n",
+                    flights[i].flight_id, flights[i].baggage_availability);
 
             // 检查 response 缓冲区是否足够大，动态扩展
             if (strlen(response) + strlen(flight_info) >= response_size) {
@@ -106,16 +108,14 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buf
                     "Departure Time: %s\n"
                     "Airfare: %.2f\n"
                     "Seats Available: %d\n"
-                    "Meal Option: %s\n"
-                    "Baggage Weight: %.2f kg\n",
+                    "Baggage Availability: %d kg\n",
                     flights[i].flight_id,
                     flights[i].source_place,
                     flights[i].destination_place,
                     departure_time,  // 使用格式化后的时间
                     flights[i].airfare,
                     flights[i].seat_availability,
-                    flights[i].meal_option,
-                    flights[i].baggage_weight);
+                    flights[i].baggage_availability);
             found = 1;
             break;  // 找到匹配的航班后退出循环
         }
@@ -130,35 +130,121 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buf
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 }
 
-// 处理航班座位预订请求
+// 座位预定函数
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
     int flight_id, seats;
+    int found = 0;
+    char response[BUFFER_SIZE];  // 用于存储响应内容
+    memset(response, 0, BUFFER_SIZE);
+
+    // 从客户端请求中提取航班ID
     sscanf(buffer, "RESERVE %d %d", &flight_id, &seats);
 
-    char *response = (char *)malloc(BUFFER_SIZE * sizeof(char));
-    if (response == NULL) {
-        perror("Memory allocation failed");
-        return;
-    }
-
-    int found = 0;
+    // 遍历航班数组，查找匹配的航班ID
     for (int i = 0; i < flight_count; i++) {
         if (flights[i].flight_id == flight_id) {
-            if (flights[i].seat_availability >= seats) {
-                flights[i].seat_availability -= seats;
-                sprintf(response, "Reservation successful. Remaining seats: %d\n", flights[i].seat_availability);
-            } else {
-                strcpy(response, "Not enough available seats");
-            }
             found = 1;
+            // 检查是否有空余座位
+            if (flights[i].seat_availability == 0){
+                // 如果没有空余座位，返回错误消息
+                strcpy(response, "Reservation failed: No seats available.\n");
+            }
+            else if (flights[i].seat_availability < seats) {
+                // 如果没有空余座位，返回错误消息
+                strcpy(response, "Reservation failed: No enough seats available. Reduce your reservation.\n");
+                
+            } else {
+                // 预定座位，减少可用座位数量
+                flights[i].seat_availability -= seats;
+
+                // 返回预定确认消息
+                sprintf(response, "Reservation confirmed for Flight ID: %d\nSeats remaining: %d\n",
+                        flights[i].flight_id,
+                        flights[i].seat_availability);
+            }
+            break;  // 找到匹配的航班后退出循环
+        }
+    }
+
+    // 如果没有找到匹配的航班，返回错误消息
+    if (!found) {
+        strcpy(response, "Flight not found.\n");
+    }
+
+    // 将结果发送回客户端
+    sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+}
+
+void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
+    int flight_id, baggages;
+    int found = 0;
+    char response[BUFFER_SIZE];  // 用于存储响应内容
+    memset(response, 0, BUFFER_SIZE);
+
+    // 从客户端请求中提取航班ID
+    sscanf(buffer, "ADD_BAGGAGE %d %d", &flight_id, &baggages);
+
+     // 遍历航班数组，查找匹配的航班ID
+    for (int i = 0; i < flight_count; i++) {
+        if (flights[i].flight_id == flight_id) {
+            found = 1;
+            // 检查是否有空余行李位置
+            if (flights[i].baggage_availability == 0){
+                // 如果没有空余行李位置，返回错误消息
+                strcpy(response, "Reservation failed: No baggage acceptable.\n");
+            }
+            else if (flights[i].baggage_availability < baggages) {
+                // 如果没有空余行李位置，返回错误消息
+                strcpy(response, "Reservation failed: No enough place for baggage available. Reduce your reservation.\n");
+                
+            } else {
+                // 预定行李位置，减少可用座位数量
+                flights[i].baggage_availability -= baggages;
+
+                // 返回预定确认消息
+                sprintf(response, "Reservation confirmed for Flight ID: %d\nBaggages still acceptable: %d\n",
+                        flights[i].flight_id,
+                        flights[i].baggage_availability);
+            }
+            break;  // 找到匹配的航班后退出循环
+        }
+    }
+
+    // 如果没有找到匹配的航班，返回错误消息
+    if (!found) {
+        strcpy(response, "Flight not found.\n");
+    }
+
+    // 将结果发送回客户端
+    sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+}
+
+
+void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
+    int flight_id;
+    int found = 0;
+    char response[BUFFER_SIZE];  // 用于存储响应内容
+    memset(response, 0, BUFFER_SIZE);
+
+    // 从客户端请求中提取航班ID
+    sscanf(buffer, "QUERY_BAGGAGE %d", &flight_id);
+
+    // 遍历航班数组，查找匹配的航班ID
+    for (int i = 0; i < flight_count; i++) {
+        if (flights[i].flight_id == flight_id) {
+            found = 1;
+            // 返回该航班的行李可用空间
+            sprintf(response, "Flight ID: %d\nBaggage space available: %d\n", 
+                    flights[i].flight_id, flights[i].baggage_availability);
             break;
         }
     }
 
+    // 如果没有找到匹配的航班，返回错误消息
     if (!found) {
-        strcpy(response, "Flight not found");
+        strcpy(response, "Flight not found.\n");
     }
 
+    // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-    free(response);
 }

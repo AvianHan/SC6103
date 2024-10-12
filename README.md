@@ -116,6 +116,12 @@ printed on the screen.
 	SELECT * FROM flights;
 ![image](https://github.com/user-attachments/assets/df31c795-4781-4066-a20d-d8b23099c47f)
 
+	gcc -o database_connect F:/ntu/course/6103/SC6103_DS/src/server_c/database_connect.c -IF:/anzhuangbao/Wnmp-4.2.0/mariadb-bins/default/include -	LF:/anzhuangbao/Wnmp-4.2.0/mariadb-bins/default/lib F:/anzhuangbao/Wnmp-4.2.0/mariadb-bins/default/lib/libmariadb.dll
+![image](https://github.com/user-attachments/assets/1f541da9-b92d-47f0-8601-bf052a54a642)
+
+	F:/ntu/course/6103/SC6103_DS/src/server_c/database_connect.exe
+![image](https://github.com/user-attachments/assets/4fac1f70-e702-4880-b7eb-1c40608edbd4)
+
 
 
 

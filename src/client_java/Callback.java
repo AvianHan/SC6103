@@ -35,7 +35,7 @@ public class Callback {
             socket.send(packet);
     
             // 启动一个线程来接收回调消息
-            executorService.submit(this::receiveCallback);
+            executorService.submit(() -> receiveCallback(monitorInterval));
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error sending monitoring request");
@@ -44,7 +44,7 @@ public class Callback {
     
 
     // 接收服务器的回调消息
-    private void receiveCallback() {
+    private void receiveCallback(int monitorInterval) {
         long startTime = System.currentTimeMillis();
         long monitorIntervalMillis = monitorInterval * 1000L; // 将秒数转换为毫秒
         try {
