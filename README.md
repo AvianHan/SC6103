@@ -1,5 +1,7 @@
 # SC6103_DS
-due 10.16 code + report
+due 2024.10.16 code + report
+
+due 2024.10.19 demonstration
 
 next meeting:
  - 10.10 9:00am
@@ -10,10 +12,10 @@ next meeting:
  - UDP sockets
 ![CS Communication Flow](cs-communication-flow.png)
 
-### Server - C (gh + ylr)
+### Server
 
 #### store the information of all flights
-'''
+```
 flight:
 {
     flight_id: int
@@ -29,9 +31,10 @@ flight:
     airfare: float
     seat_availability: int // num of seats available
 }
-'''
+```
 
 #### implement services on the flights for remote access by clients
+```
 1. query_flight_id (source_place, destination_place) {
     if multiple flights match:
         return a list of all
@@ -60,9 +63,9 @@ flight:
     - one non-idempotent VIP休息室+其他各类需求购买
 
 6. create a new thread to serve each request received
-'''
+```
 
-### Client - Java (yfh + hsy)
+### Client
 1. provide an interface that repeatedly asks the user to enter a request and sends the request to the server
  
 2. include an option for the user to terminate the client
@@ -74,7 +77,23 @@ flight:
     2. transmit in byte array
         - marshaling (int / float / str)
         - unmarshalling
-
+```
  #include <netinet/in.h>
  uint32_t htonl(uint32_t hostlong);
  uint32_t ntohl(uint32_t netlong);
+```
+
+
+## Meeting Notes
+### 2024.10.06
+ 1. task decomposition and distribution
+    - server side (C) - Gaohan & Ziling
+    - client side (Java) - Fanhui & Shuangyue
+ 2. customized function determination
+    - idempotent: choose meal
+    - non-idempotent: buy VIP lounge or other additional services
+
+### 2024.10.10
+
+
+### 2024.10.12
