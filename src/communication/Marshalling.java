@@ -1,6 +1,6 @@
+package SC6103_DS.communication;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-package communication;
 
 
 public class Marshalling {
