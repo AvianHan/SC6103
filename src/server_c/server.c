@@ -10,14 +10,20 @@
 #elif _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <windows.h>
 #pragma comment(lib, "ws2_32.lib")
 #endif
+#include <pthread.h>
 #include "server.h"
+#include "handler.h"
 
 #define PORT 8080
 #define BUFFER_SIZE 1024
 
-void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+// 航班数据
+pthread_mutex_t flight_mutex = PTHREAD_MUTEX_INITIALIZER;  // 互斥锁
+
+void* handle_client(void* arg);    // 处理客户端请求的线程
 
 int main() {
     #ifdef _WIN32
@@ -60,15 +66,14 @@ int main() {
 
     printf("Server is running on port %d...\n", PORT);
 
-    // 启动一个线程来监控航班状态
+    // 启动航班监控线程
     pthread_t monitor_thread;
-    if (pthread_create(&monitor_thread, NULL, (void *)register_callback, (void *)&sockfd) != 0) {
-    perror("Thread creation failed");
-    close(sockfd);
-    free(buffer);
-    exit(EXIT_FAILURE);
-}
-
+    if (pthread_create(&monitor_thread, NULL, monitor_flights, (void*)&sockfd) != 0) {
+        perror("Monitor thread creation failed");
+        close(sockfd);
+        free(buffer);
+        exit(EXIT_FAILURE);
+    }
 
     // 主循环：处理客户端请求
     while (1) {
@@ -81,8 +86,14 @@ int main() {
             continue;
         }
 
-        // 处理客户端请求
-        handle_client_request(sockfd, &client_addr, buffer);
+        // 每次接收请求创建一个线程来处理客户端
+        pthread_t client_thread;
+        struct sockaddr_in* client_addr_copy = malloc(sizeof(struct sockaddr_in));
+        memcpy(client_addr_copy, &client_addr, sizeof(struct sockaddr_in));  // 复制客户端地址
+        if (pthread_create(&client_thread, NULL, handle_client, (void*)client_addr_copy) != 0) {
+            perror("Client thread creation failed");
+            free(client_addr_copy);
+        }
     }
 
     #ifdef _WIN32
@@ -94,29 +105,27 @@ int main() {
     return 0;
 }
 
-// 处理客户端请求
-void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
-    char command[20];
-    sscanf(buffer, "%s", command);
+// 处理客户端请求的线程
+void* handle_client(void* arg) {
+    int sockfd = *(int*)arg;
+    struct sockaddr_in client_addr = *((struct sockaddr_in*)arg);
+    socklen_t addr_len = sizeof(client_addr);
+    char buffer[BUFFER_SIZE];
 
-    if (strcmp(command, "QUERY_FLIGHT") == 0) {
-        handle_query_flight(sockfd, client_addr, buffer);
-    } else if (strcmp(command, "QUERY_FLIGHT_ID") == 0) {
-        handle_query_details(sockfd, client_addr, buffer);
-    } else if (strcmp(command, "RESERVE") == 0) {
-        handle_reservation(sockfd, client_addr, buffer);
-    } else if (strcmp(command, "ADD_BAGGAGE") == 0){
-        handle_add_baggage(sockfd, client_addr, buffer);
-    } else if(strcmp(command, "QUERY_BAGGAGE") == 0){
-        handle_query_baggage_availability(sockfd, client_addr, buffer);
-    } else {
-        char *error_msg = (char *)malloc(BUFFER_SIZE * sizeof(char));
-        if (error_msg == NULL) {
-            perror("Memory allocation failed");
-            return;
+    // 释放传入的参数内存
+    free(arg);
+
+    while (1) {
+        memset(buffer, 0, BUFFER_SIZE);
+        int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &addr_len);
+        if (n < 0) {
+            perror("Receive failed");
+            continue;
         }
-        strcpy(error_msg, "Invalid command");
-        sendto(sockfd, error_msg, strlen(error_msg), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-        free(error_msg);
+
+        // 处理客户端请求
+        handle_client_request(sockfd, &client_addr, buffer);
     }
+
+    return NULL;
 }
