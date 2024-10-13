@@ -1,6 +1,9 @@
 #include "communication.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include "server.h"
+
 
 // Unmarshal an integer from a byte array
 int unmarshal_int(const uint8_t* byte_array, uint32_t* offset) {

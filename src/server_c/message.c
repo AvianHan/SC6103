@@ -1,6 +1,8 @@
 #include "communication.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include "server.h"
 
 // Function to create a new DepartureTime object
 DepartureTime* create_departure_time(int year, int month, int day, int hour, int minute) {

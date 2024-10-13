@@ -39,6 +39,9 @@ void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_i
 void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int flight_id);
 void* monitor_flights(void* arg);
+// 在适当的头文件中声明
+Flight* unmarshal_flight(const uint8_t* buffer, uint32_t* flight_data_length);
+
 
 // 数据存储头文件
 void initialize_flights();
