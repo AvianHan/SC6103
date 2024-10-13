@@ -1,4 +1,5 @@
 package SC6103_DS.src.client_java;
+package SC6103_DS.src.client_java;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
