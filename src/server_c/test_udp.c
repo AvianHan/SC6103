@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <errno.h>  // 用于捕获错误码
 
 #define PORT 8080  // 服务器端口
 
@@ -44,8 +45,11 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
     }
 
     // 发送响应给客户端
-    sendto(sockfd, response, strlen(response), MSG_CONFIRM, (const struct sockaddr *)&cliaddr, len);
-    printf("Response sent to client: %s\n", response);
+    if (sendto(sockfd, response, strlen(response), MSG_CONFIRM, (const struct sockaddr *)&cliaddr, len) < 0) {
+        perror("sendto failed");  // 发送失败时输出错误信息
+    } else {
+        printf("Response sent to client: %s\n", response);
+    }
 }
 
 int main() {
@@ -79,6 +83,12 @@ int main() {
     // 不断接收客户端消息并处理
     while (1) {
         int n = recvfrom(sockfd, buffer, 1024, MSG_WAITALL, (struct sockaddr *)&cliaddr, &len);
+        if (n < 0) {
+            // 捕获并输出具体的错误信息
+            printf("recvfrom failed: %s (errno: %d)\n", strerror(errno), errno);
+            continue;
+        }
+
         buffer[n] = '\0';  // 将接收的消息转为字符串
         printf("Received request: %s\n", buffer);
 
