@@ -35,7 +35,7 @@ typedef struct {
 } Flight;
 
 // 回调处理头文件
-void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_id, int monitor_interval);
+// void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_id, int monitor_interval);
 void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int flight_id);
 void* monitor_flights(void* arg);
@@ -53,9 +53,15 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buf
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+
 // 线程池头文件
 void thread_pool_init(int num_threads);
 void thread_pool_add_task(void (*function)(void *), void *arg);
 void thread_pool_destroy();
+
+// 服务器文件
+void store_in_history(struct sockaddr_in* client_addr, const char* request, const char* response);
+int find_in_history(struct sockaddr_in* client_addr, const char* request, char* response);
+void* handle_client(void* arg);
 
 #endif // SERVER_H
