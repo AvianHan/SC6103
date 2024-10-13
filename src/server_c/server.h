@@ -39,6 +39,9 @@ typedef struct {
 void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int flight_id);
 void* monitor_flights(void* arg);
+// 在适当的头文件中声明
+Flight* unmarshal_flight(const uint8_t* buffer, uint32_t* flight_data_length);
+
 
 // 数据存储头文件
 void initialize_flights();
@@ -48,7 +51,7 @@ int add_flight(int flight_id, const char *source, const char *destination, Depar
 
 
 // 航班服务头文件
-void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *source, char *destination)
+void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *source, char *destination);
 void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *buffer);

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdint.h>
 #ifdef __linux__
 #include <arpa/inet.h>
 #include <netinet/in.h>

@@ -2,7 +2,8 @@
 #include <mysql/mysql.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>    // For strdup and other string functions
+#include <string.h>
+#include <stdint.h>    // For strdup and other string functions
 
 // 数据库连接信息
 #define HOST "localhost"

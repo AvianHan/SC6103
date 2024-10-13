@@ -1,6 +1,9 @@
 #include "communication.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include "server.h"
+
 
 // Marshal an integer to a byte array (4 bytes)
 uint8_t* marshal_int(int value) {

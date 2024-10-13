@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdint.h>
+
+
 #ifdef __linux__
 #include <arpa/inet.h>
 #include <netinet/in.h>
