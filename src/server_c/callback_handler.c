@@ -37,6 +37,7 @@ extern pthread_mutex_t flight_mutex;  // 互斥锁
 // 处理客户端请求
 void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
     char command[20];
+
     sscanf(buffer, "%s", command);
 
     uint32_t flight_data_length;

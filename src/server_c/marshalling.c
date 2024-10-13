@@ -53,7 +53,7 @@ uint8_t* marshal_flight(const Flight* flight, uint32_t* out_length) {
     uint32_t source_len, dest_len, time_len;
     uint8_t* source = marshal_string(flight->source_place, &source_len);
     uint8_t* dest = marshal_string(flight->destination_place, &dest_len);
-    uint8_t* time = marshal_departure_time(flight->departure_time, &time_len);
+    uint8_t* time = marshal_departure_time(&(flight->departure_time), &time_len);
 
     *out_length = 4 + source_len + dest_len + time_len + 4 + 4 + 4;
     uint8_t* buffer = malloc(*out_length);

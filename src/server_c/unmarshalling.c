@@ -33,13 +33,13 @@ char* unmarshal_string(const uint8_t* byte_array, uint32_t* offset) {
 }
 
 // Unmarshal a DepartureTime structure from a byte array
-DepartureTime* unmarshal_departure_time(const uint8_t* byte_array, uint32_t* offset) {
-    DepartureTime* time = malloc(sizeof(DepartureTime));
-    time->year = unmarshal_int(byte_array, offset);
-    time->month = unmarshal_int(byte_array, offset);
-    time->day = unmarshal_int(byte_array, offset);
-    time->hour = unmarshal_int(byte_array, offset);
-    time->minute = unmarshal_int(byte_array, offset);
+DepartureTime unmarshal_departure_time(const uint8_t* byte_array, uint32_t* offset) {
+    DepartureTime time;
+    time.year = unmarshal_int(byte_array, offset);
+    time.month = unmarshal_int(byte_array, offset);
+    time.day = unmarshal_int(byte_array, offset);
+    time.hour = unmarshal_int(byte_array, offset);
+    time.minute = unmarshal_int(byte_array, offset);
     return time;
 }
 
@@ -49,8 +49,13 @@ Flight* unmarshal_flight(const uint8_t* byte_array, uint32_t* offset) {
     flight->flight_id = unmarshal_int(byte_array, offset);
     flight->source_place = unmarshal_string(byte_array, offset);
     flight->destination_place = unmarshal_string(byte_array, offset);
+    
+    // Now unmarshal_departure_time returns a structure, not a pointer
     flight->departure_time = unmarshal_departure_time(byte_array, offset);
+    
     flight->airfare = unmarshal_float(byte_array, offset);
     flight->seat_availability = unmarshal_int(byte_array, offset);
     flight->baggage_availability = unmarshal_int(byte_array, offset);
+    
+    return flight;
 }
