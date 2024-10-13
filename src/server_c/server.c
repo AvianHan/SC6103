@@ -19,6 +19,7 @@
 #define PORT 8080
 #define BUFFER_SIZE 1024
 #define MAX_HISTORY 100
+#define SERVER_IP "172.20.10.10"  //server IP
 
 // 互斥锁
 pthread_mutex_t flight_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -155,7 +156,7 @@ int main(int argc, char* argv[]) {
     // 配置服务器地址
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
     server_addr.sin_port = htons(PORT);
 
     // 绑定套接字到指定端口
