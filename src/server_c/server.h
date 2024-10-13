@@ -48,7 +48,7 @@ int add_flight(int flight_id, const char *source, const char *destination, Depar
 
 
 // 航班服务头文件
-void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *source, char *destination);
 void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *buffer);
@@ -57,5 +57,6 @@ void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_ad
 void thread_pool_init(int num_threads);
 void thread_pool_add_task(void (*function)(void *), void *arg);
 void thread_pool_destroy();
+
 
 #endif // SERVER_H
