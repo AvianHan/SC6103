@@ -13,7 +13,10 @@
 #endif
 #include <pthread.h>
 #include "server.h"
+
 //server.h
+
+#define BUFFER_SIZE 1024
 
 // 航班结构体
 typedef struct {
@@ -33,6 +36,14 @@ typedef struct {
     int seat_availability;
     int baggage_availability;
 } Flight;
+
+struct client_data{
+    char buffer[BUFFER_SIZE];
+    struct sockaddr_in client_addr;
+    int sockfd;
+    socklen_t addr_len;
+};
+
 
 // 回调处理头文件
 // void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_id, int monitor_interval);
@@ -67,5 +78,8 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
 void store_in_history(struct sockaddr_in* client_addr, const char* request, const char* response);
 int find_in_history(struct sockaddr_in* client_addr, const char* request, char* response);
 void* handle_client(void* arg);
+
+// request_handler.c
+void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 
 #endif // SERVER_H

@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
                 store_in_history(&client_addr, buffer, reply);
             }
         }
-        char reply[BUFFER_SIZE];
+        // char reply[BUFFER_SIZE];
 
         // 发送响应给客户端（无论是新请求还是重复请求）
         sendto(sockfd, reply, strlen(reply), 0, (struct sockaddr *)&client_addr, addr_len);

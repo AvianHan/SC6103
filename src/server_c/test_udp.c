@@ -1,8 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
 #include <errno.h>  // 用于捕获错误码
+#ifdef _WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #pragma comment(lib, "ws2_32.lib")
+#else
+    #include <arpa/inet.h>
+#endif
+// test_udp.c
+
 
 #define PORT 8080  // 服务器端口
 
@@ -45,7 +53,7 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
     }
 
     // 发送响应给客户端
-    if (sendto(sockfd, response, strlen(response), MSG_CONFIRM, (const struct sockaddr *)&cliaddr, len) < 0) {
+    if (sendto(sockfd, response, strlen(response), 0, (const struct sockaddr *)&cliaddr, len) < 0) {
         perror("sendto failed");  // 发送失败时输出错误信息
     } else {
         printf("Response sent to client: %s\n", response);
