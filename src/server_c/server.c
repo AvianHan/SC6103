@@ -15,6 +15,8 @@
 #endif
 #include <pthread.h>
 #include "server.h"
+#include "communication.h"  // 包含 marshalling 和 unmarshalling 功能
+
 
 #define PORT 8080
 #define BUFFER_SIZE 1024

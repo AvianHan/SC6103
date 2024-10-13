@@ -25,6 +25,12 @@ flight:
 }
 ```
 
+Marshalling (正常) → byte
+byte Message (marshlled) 
+socketpackage (massa)
+unmarshalling (byte) → 正常
+
+
 
 ### implement services on the flights for remote access by clients
 ```
