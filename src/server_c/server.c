@@ -75,65 +75,21 @@ int find_in_history(struct sockaddr_in *client_addr, const char *request, char *
 // 处理客户端请求的线程
 void *handle_client(void *arg)
 {
-    int sockfd = *(int *)arg;
-    struct sockaddr_in client_addr = *((struct sockaddr_in *)arg);
-    socklen_t addr_len = sizeof(client_addr);
-    char buffer[BUFFER_SIZE];
-
-    // 释放传入的参数内存
-    free(arg);
-
-    while (1)
+    struct client_data
     {
-        memset(buffer, 0, BUFFER_SIZE);
-        int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &addr_len);
-        if (n < 0)
-        {
-            printf("Receive failed: %s\n", strerror(errno)); // 打印具体的错误信息
-            continue;
-        }
-        if (n < 0)
-        {
-            perror("Receive failed");
-            continue;
-        }
+        char buffer[BUFFER_SIZE];
+        struct sockaddr_in client_addr;
+        int sockfd;
+        socklen_t addr_len;
+    };
 
-        char reply[BUFFER_SIZE];
+    struct client_data *data = (struct client_data *)arg;
 
-        if (use_at_least_once)
-        {
-            // At-least-once: 直接重新执行请求
-            printf("Processing new request (At-least-once): %s\n", buffer);
-            handle_client_request(sockfd, &client_addr, buffer);
+    // 调用 handleRequest 函数处理接收到的请求
+    handleRequest(data->buffer, data->client_addr, data->sockfd, data->addr_len);
 
-            // 生成新的响应
-            snprintf(reply, sizeof(reply), "Response to: %s", buffer);
-        }
-        else
-        {
-            // At-most-once: 检查历史记录，避免重复处理
-            if (find_in_history(&client_addr, buffer, reply))
-            {
-                // ---- 3. Re-reply: 找到重复请求，直接返回历史响应 ----
-                printf("Duplicate request found (At-most-once), sending cached response.\n");
-            }
-            else
-            {
-                // 没有找到重复请求，处理客户端请求
-                printf("Processing new request (At-most-once): %s\n", buffer);
-                handle_client_request(sockfd, &client_addr, buffer);
-
-                // 生成新的响应
-                snprintf(reply, sizeof(reply), "Response to: %s", buffer);
-
-                // 将请求和响应存储到历史记录中 (Store history)
-                store_in_history(&client_addr, buffer, reply);
-            }
-        }
-
-        // 发送响应给客户端（无论是新请求还是重复请求）
-        sendto(sockfd, reply, strlen(reply), 0, (struct sockaddr *)&client_addr, addr_len);
-    }
+    // 释放动态分配的内存
+    free(data);
 
     return NULL;
 }
@@ -195,7 +151,6 @@ int main(int argc, char *argv[])
     server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
     server_addr.sin_port = htons(PORT);
 
-
     // 绑定套接字到指定端口
     if (bind(sockfd, (const struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
     {
@@ -211,6 +166,7 @@ int main(int argc, char *argv[])
     while (1)
     {
         memset(buffer, 0, BUFFER_SIZE);
+        char reply[BUFFER_SIZE];
 
         // 接收客户端请求
         int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &addr_len);
@@ -220,15 +176,62 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        // 每次接收请求创建一个线程来处理客户端
+      
+        // 为每个请求创建一个新的线程并传递给 handleRequest 函数处理
         pthread_t client_thread;
-        struct sockaddr_in *client_addr_copy = malloc(sizeof(struct sockaddr_in));
-        memcpy(client_addr_copy, &client_addr, sizeof(struct sockaddr_in)); // 复制客户端地址
-        if (pthread_create(&client_thread, NULL, handle_client, (void *)client_addr_copy) != 0)
+        struct client_data *data = malloc(sizeof(struct client_data));
+        if (!data)
+        {
+            perror("Malloc failed");
+            continue;
+        }
+
+        // 复制接收到的请求数据和客户端地址信息
+        strncpy(data->buffer, buffer, BUFFER_SIZE);
+        data->client_addr = client_addr;
+        data->sockfd = sockfd;
+        data->addr_len = addr_len;
+
+        if (pthread_create(&client_thread, NULL, handle_client, (void *)data) != 0)
         {
             perror("Client thread creation failed");
-            free(client_addr_copy);
+            free(data);
+        }                                                                    // 为每个请求创建一个新的线程并传递给 `handleRequest` 函数处理
+
+        if (use_at_least_once)
+        {
+            // At-least-once: 直接重新执行请求
+            printf("Processing new request (At-least-once): %s\n", buffer);
+            handle_client_request(sockfd, &client_addr, buffer);
+
+            // 生成新的响应
+            snprintf(reply, sizeof(reply), "Response to: %s", buffer);
         }
+        else
+        {
+            // At-most-once: 检查历史记录，避免重复处理
+            if (find_in_history(&client_addr, buffer, reply))
+            {
+                // ---- 3. Re-reply: 找到重复请求，直接返回历史响应 ----
+                printf("Duplicate request found (At-most-once), sending cached response.\n");
+            }
+            else
+            {
+                // 没有找到重复请求，处理客户端请求
+                printf("Processing new request (At-most-once): %s\n", buffer);
+                handle_client_request(sockfd, &client_addr, buffer);
+
+                // 生成新的响应
+                snprintf(reply, sizeof(reply), "Response to: %s", buffer);
+
+                // 将请求和响应存储到历史记录中 (Store history)
+                store_in_history(&client_addr, buffer, reply);
+            }
+        }
+        char reply[BUFFER_SIZE];
+
+        // 发送响应给客户端（无论是新请求还是重复请求）
+        sendto(sockfd, reply, strlen(reply), 0, (struct sockaddr *)&client_addr, addr_len);
     }
 
 #ifdef _WIN32
