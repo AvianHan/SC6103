@@ -1,9 +1,9 @@
+#include <stdint.h>  // 添加这个头文件来定义 uint8_t 和 uint32_t
 #include "server.h"    // This must include Flight struct definition
 #include <mysql/mysql.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>    // For strdup and other string functions
 
 // 数据库连接信息
 #define HOST "localhost"

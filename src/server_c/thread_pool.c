@@ -1,11 +1,11 @@
 // 线程池管理
 // thread_pool.c
+#include <stdint.h>  // 添加这个头文件来定义 uint8_t 和 uint32_t
 #include "server.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <stdint.h>
 
 
 #define MAX_THREADS 10

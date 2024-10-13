@@ -1,10 +1,11 @@
 // 航班数据存储与管理
 // data_storage.c
+#include <stdint.h>  // 添加这个头文件来定义 uint8_t 和 uint32_t
 #include "server.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
+
 
 Flight *flights = NULL;
 int flight_count = 0;

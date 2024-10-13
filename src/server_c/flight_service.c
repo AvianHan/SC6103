@@ -1,11 +1,12 @@
 // 航班相关服务实现
 // flight_service.c
+#include <stdint.h>  // 添加这个头文件来定义 uint8_t 和 uint32_t
 #include "server.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <stdint.h>
+
 #ifdef __linux__
 #include <arpa/inet.h>
 #include <netinet/in.h>
