@@ -1,74 +1,49 @@
-
+package SC6103_DS.src.client_java;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class Marshalling {
+    
+    // Encode an int as 4 bytes
+    public static byte[] encode_int(int value) {
+        return ByteBuffer.allocate(4).putInt(value).array();
+    }
 
-    // Marshal an entire Message object to byte array
-    public static byte[] marshalMessage(Message message) {
-        byte[] data = message.data;
+    // Encode a float as 4 bytes
+    public static byte[] encode_float(float value) {
+        return ByteBuffer.allocate(4).putFloat(value).array();
+    }
 
-        ByteBuffer buffer = ByteBuffer.allocate(1 + 4 + 4 + data.length);
-        buffer.put(message.messageType);
-        buffer.put(marshalInt(message.requestId));
-        buffer.put(marshalInt(message.dataLength));
-        buffer.put(data);
-
+    // Encode a string with a 4-byte length prefix
+    public static byte[] encode_string(String value) {
+        byte[] strBytes = value.getBytes(StandardCharsets.UTF_8);
+        ByteBuffer buffer = ByteBuffer.allocate(4 + strBytes.length);
+        buffer.putInt(strBytes.length);
+        buffer.put(strBytes);
         return buffer.array();
     }
 
-    // Marshal a Flight object to byte array
-    public static byte[] marshalFlight(Message.Flight flight) {
-        byte[] sourceBytes = marshalString(flight.sourcePlace);
-        byte[] destBytes = marshalString(flight.destinationPlace);
-        byte[] departureBytes = marshalDepartureTime(flight.departureTime);
-
-        ByteBuffer buffer = ByteBuffer.allocate(
-            4 + sourceBytes.length + destBytes.length + departureBytes.length + 4 + 4 + 4);
-
-        buffer.put(marshalInt(flight.flightId));
-        buffer.put(sourceBytes);
-        buffer.put(destBytes);
-        buffer.put(departureBytes);
-        buffer.put(marshalFloat(flight.airfare));
-        buffer.put(marshalInt(flight.seatAvailability));
-        buffer.put(marshalInt(flight.baggageAvailability));
-
+    // Encode departure time with year, month, day, hour, and minute (20 bytes total)
+    public static byte[] encode_departure_time(int year, int month, int day, int hour, int minute) {
+        ByteBuffer buffer = ByteBuffer.allocate(20);
+        buffer.putInt(year);
+        buffer.putInt(month);
+        buffer.putInt(day);
+        buffer.putInt(hour);
+        buffer.putInt(minute);
         return buffer.array();
     }
 
-    // Marshal a DepartureTime object to byte array
-    public static byte[] marshalDepartureTime(Message.DepartureTime departureTime) {
-        ByteBuffer buffer = ByteBuffer.allocate(5 * 4);
-        buffer.put(marshalInt(departureTime.year));
-        buffer.put(marshalInt(departureTime.month));
-        buffer.put(marshalInt(departureTime.day));
-        buffer.put(marshalInt(departureTime.hour));
-        buffer.put(marshalInt(departureTime.minute));
+    // Build a complete message according to the protocol
+    public static byte[] build_message(int message_type, int request_id, byte[] payload) {
+        int payload_len = payload.length;
+        ByteBuffer buffer = ByteBuffer.allocate(1 + 4 + 4 + payload_len);
+        buffer.put((byte) message_type); // 1-byte message type
+        buffer.putInt(request_id); // 4-byte request ID
+        buffer.putInt(payload_len); // 4-byte payload length
+        buffer.put(payload); // Variable-length payload
         return buffer.array();
     }
 
-    // Method to marshal a String with length prefix
-    public static byte[] marshalString(String value) {
-        byte[] stringBytes = value.getBytes(StandardCharsets.UTF_8);
-        ByteBuffer buffer = ByteBuffer.allocate(4 + stringBytes.length);
-        buffer.putInt(stringBytes.length);
-        buffer.put(stringBytes);
-        return buffer.array();
-    }
-
-    // Method to marshal an int into a byte array
-    public static byte[] marshalInt(int value) {
-        ByteBuffer buffer = ByteBuffer.allocate(4);
-        buffer.putInt(value);
-        return buffer.array();
-    }
-
-    // Method to marshal a float into a byte array
-    public static byte[] marshalFloat(float value) {
-        ByteBuffer buffer = ByteBuffer.allocate(4);
-        buffer.putFloat(value);
-        return buffer.array();
-    }
 }

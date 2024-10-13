@@ -1,22 +1,35 @@
-
+package SC6103_DS.src.client_java;
 
 public class Message {
+    private int message_type;
+    private int request_id;
+    private byte[] payload;
 
-    // Message Type Constants
-    public static final byte REGISTER_REQUEST = 0x00;
-    public static final byte QUERY_FLIGHT_ID_REQUEST = 0x01;
-    public static final byte QUERY_FLIGHT_INFO_REQUEST = 0x02;
-    public static final byte MAKE_SEAT_RESERVATION_REQUEST = 0x03;
-    public static final byte QUERY_BAGGAGE_AVAILABILITY_REQUEST = 0x04;
-    public static final byte ADD_BAGGAGE_REQUEST = 0x05;
+    public Message(int message_type, int request_id, byte[] payload) {
+        this.message_type = message_type;
+        this.request_id = request_id;
+        this.payload = payload;
+    }
 
-    // Nested DepartureTime structure within Flight
+    public int get_message_type() {
+        return message_type;
+    }
+
+    public int get_request_id() {
+        return request_id;
+    }
+
+    public byte[] get_payload() {
+        return payload;
+    }
+
+    // Nested class for DepartureTime
     public static class DepartureTime {
-        public int year;
-        public int month;
-        public int day;
-        public int hour;
-        public int minute;
+        private int year;
+        private int month;
+        private int day;
+        private int hour;
+        private int minute;
 
         public DepartureTime(int year, int month, int day, int hour, int minute) {
             this.year = year;
@@ -25,57 +38,10 @@ public class Message {
             this.hour = hour;
             this.minute = minute;
         }
-    }
 
-    // Flight structure
-    public static class Flight {
-        public int flightId;
-        public String sourcePlace;
-        public String destinationPlace;
-        public DepartureTime departureTime;
-        public float airfare;
-        public int seatAvailability;
-        public int baggageAvailability;
-
-        public Flight(int flightId, String sourcePlace, String destinationPlace, 
-                      DepartureTime departureTime, float airfare, 
-                      int seatAvailability, int baggageAvailability) {
-            this.flightId = flightId;
-            this.sourcePlace = sourcePlace;
-            this.destinationPlace = destinationPlace;
-            this.departureTime = departureTime;
-            this.airfare = airfare;
-            this.seatAvailability = seatAvailability;
-            this.baggageAvailability = baggageAvailability;
+        @Override
+        public String toString() {
+            return String.format("%d-%02d-%02d %02d:%02d", year, month, day, hour, minute);
         }
-    }
-
-    // Message fields
-    public int messageType;
-    public int requestId;
-    public int dataLength;
-    public byte[] data;
-
-    // Constructor for Message class with direct byte array data
-    public Message(int messageType, int requestId, int dataLength, byte[] data) {
-        this.messageType = messageType;
-        this.requestId = requestId;
-        this.dataLength = dataLength;
-        this.data = data;
-    }
-
-    // Constructor for Message class with Flight object data
-    public Message(int messageType, int requestId, Flight flightData) {
-        this.messageType = messageType;
-        this.requestId = requestId;
-        this.data = Marshalling.marshalFlight(flightData);
-        this.dataLength = data.length;
-    }
-
-    // Method to print Message information
-    public void printMessageInfo() {
-        System.out.println("Message Type: " + messageType);
-        System.out.println("Request ID: " + requestId);
-        System.out.println("Data Length: " + dataLength);
     }
 }
