@@ -2,6 +2,7 @@
 #define COMMUNICATION_H
 
 #include <stdint.h>
+#include "server.h"
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -17,26 +18,6 @@
 #define MAKE_SEAT_RESERVATION_REQUEST 0x03
 #define QUERY_BAGGAGE_AVAILABILITY_REQUEST 0x04
 #define ADD_BAGGAGE_REQUEST 0x05
-
-// DepartureTime structure within Flight
-typedef struct {
-    int year;
-    int month;
-    int day;
-    int hour;
-    int minute;
-} DepartureTime;
-
-// Flight structure
-typedef struct {
-    int flight_id;
-    char* source_place;
-    char* destination_place;
-    DepartureTime* departure_time;
-    float airfare;
-    int seat_availability;
-    int baggage_availability;
-} Flight;
 
 // Message structure
 typedef struct {
