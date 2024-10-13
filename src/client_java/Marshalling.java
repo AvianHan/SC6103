@@ -1,4 +1,4 @@
-
+package SC6103_DS.src.client_java;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -10,7 +10,7 @@ public class Marshalling {
         byte[] data = message.data;
 
         ByteBuffer buffer = ByteBuffer.allocate(1 + 4 + 4 + data.length);
-        buffer.put(message.messageType);
+        buffer.put(marshalInt(message.messageType));
         buffer.put(marshalInt(message.requestId));
         buffer.put(marshalInt(message.dataLength));
         buffer.put(data);
