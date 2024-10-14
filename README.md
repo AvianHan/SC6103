@@ -4,6 +4,8 @@
 ![CS Communication Flow](cs-communication-flow.png)
 
 ## testInternet: 石头sama!!!!!
+## 三台电脑处于同一网络
+## server端关闭防火墙  
 
 ## Server
 
