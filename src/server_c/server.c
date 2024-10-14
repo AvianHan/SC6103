@@ -49,6 +49,7 @@ void store_in_history(struct sockaddr_in *client_addr, const char *request, cons
         strncpy(history[history_count].request, request, BUFFER_SIZE);
         strncpy(history[history_count].response, response, BUFFER_SIZE);
         history_count++;
+        printf("store msg in history!\n");
     }
     else
     {
@@ -66,9 +67,11 @@ int find_in_history(struct sockaddr_in *client_addr, const char *request, char *
             history[i].client_addr.sin_port == client_addr->sin_port)
         {
             strcpy(response, history[i].response);
+            printf("request duplicated! exit now.\n");
             return 1; // 请求已经处理过
         }
     }
+    printf("request goes further ......\n");
     return 0; // 没有找到请求
 }
 
@@ -84,7 +87,7 @@ void *handle_client(void *arg)
     };
 
     struct client_data *data = (struct client_data *)arg;
-
+    printf("handle_client: transfer into handleRequest!\n");
     // 调用 handleRequest 函数处理接收到的请求
     handleRequest(data->buffer, data->client_addr, data->sockfd, data->addr_len);
 
@@ -104,7 +107,6 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 #endif
-
     if (argc != 2)
     {
         printf("Usage: %s [at-least-once | at-most-once]\n", argv[0]);
@@ -165,6 +167,7 @@ int main(int argc, char *argv[])
     // 主循环：处理客户端请求
     while (1)
     {
+        printf("now we are dealing msg......\n");
         memset(buffer, 0, BUFFER_SIZE);
         char reply[BUFFER_SIZE];
 
@@ -196,8 +199,8 @@ int main(int argc, char *argv[])
         {
             perror("Client thread creation failed");
             free(data);
-        }                                                                    // 为每个请求创建一个新的线程并传递给 `handleRequest` 函数处理
-
+        }                                                                    
+        printf("thread created! MSG goes in handle_client.\n");
         if (use_at_least_once)
         {
             // At-least-once: 直接重新执行请求
@@ -231,13 +234,14 @@ int main(int argc, char *argv[])
         // char reply[BUFFER_SIZE];
 
         // 发送响应给客户端（无论是新请求还是重复请求）
+        printf("sending reply!\n");
         sendto(sockfd, reply, strlen(reply), 0, (struct sockaddr *)&client_addr, addr_len);
     }
 
 #ifdef _WIN32
     WSACleanup();
 #endif
-
+    printf("gonna exit!\n");
     close(sockfd);
     free(buffer);
     return 0;
