@@ -109,11 +109,22 @@ public class UserInterface extends JFrame {
         queryFlightIdButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+//                selectedOperation = "query_flight_id";  // 设置操作为查询航班ID
+//                inputPromptLabel1.setText("Source Place:");
+//                inputPromptLabel2.setText("Destination Place:");
+//                inputPromptLabel3.setVisible(false);  // 只需要两个输入
+//                inputField3.setVisible(false);
                 selectedOperation = "query_flight_id";  // 设置操作为查询航班ID
+                // 将所有输入框和标签设为可见
+                inputPromptLabel1.setVisible(true);
+                inputPromptLabel2.setVisible(true);
+                inputPromptLabel3.setVisible(false);  // 只需要两个输入
+                inputField1.setVisible(true);
+                inputField2.setVisible(true);
+                inputField3.setVisible(false);
+
                 inputPromptLabel1.setText("Source Place:");
                 inputPromptLabel2.setText("Destination Place:");
-                inputPromptLabel3.setVisible(false);  // 只需要两个输入
-                inputField3.setVisible(false);
             }
         });
 
@@ -121,12 +132,22 @@ public class UserInterface extends JFrame {
         queryFlightInfoButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+//                selectedOperation = "query_flight_info";  // 设置操作为查询航班信息
+//                inputPromptLabel1.setText("Flight ID:");
+//                inputPromptLabel2.setVisible(false);  // 只需要一个输入
+//                inputPromptLabel3.setVisible(false);
+//                inputField2.setVisible(false);
+//                inputField3.setVisible(false);
                 selectedOperation = "query_flight_info";  // 设置操作为查询航班信息
-                inputPromptLabel1.setText("Flight ID:");
+                // 将所有输入框和标签设为可见
+                inputPromptLabel1.setVisible(true);
                 inputPromptLabel2.setVisible(false);  // 只需要一个输入
                 inputPromptLabel3.setVisible(false);
+                inputField1.setVisible(true);
                 inputField2.setVisible(false);
                 inputField3.setVisible(false);
+
+                inputPromptLabel1.setText("Flight ID:");
             }
         });
 
@@ -134,11 +155,22 @@ public class UserInterface extends JFrame {
         makeReservationButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+//                selectedOperation = "make_seat_reservation";  // 设置操作为预订座位
+//                inputPromptLabel1.setText("Flight ID:");
+//                inputPromptLabel2.setText("Number of Seats:");
+//                inputPromptLabel3.setVisible(false);
+//                inputField3.setVisible(false);
                 selectedOperation = "make_seat_reservation";  // 设置操作为预订座位
+                // 将所有输入框和标签设为可见
+                inputPromptLabel1.setVisible(true);
+                inputPromptLabel2.setVisible(true);
+                inputPromptLabel3.setVisible(false);  // 只需要两个输入
+                inputField1.setVisible(true);
+                inputField2.setVisible(true);
+                inputField3.setVisible(false);
+
                 inputPromptLabel1.setText("Flight ID:");
                 inputPromptLabel2.setText("Number of Seats:");
-                inputPromptLabel3.setVisible(false);
-                inputField3.setVisible(false);
             }
         });
 
@@ -146,12 +178,22 @@ public class UserInterface extends JFrame {
         queryBaggageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+//                selectedOperation = "query_baggage_availability";  // 设置操作为查询行李
+//                inputPromptLabel1.setText("Flight ID:");
+//                inputPromptLabel2.setVisible(false);  // 只需要一个输入
+//                inputPromptLabel3.setVisible(false);
+//                inputField2.setVisible(false);
+//                inputField3.setVisible(false);
                 selectedOperation = "query_baggage_availability";  // 设置操作为查询行李
-                inputPromptLabel1.setText("Flight ID:");
+                // 将所有输入框和标签设为可见
+                inputPromptLabel1.setVisible(true);
                 inputPromptLabel2.setVisible(false);  // 只需要一个输入
                 inputPromptLabel3.setVisible(false);
+                inputField1.setVisible(true);
                 inputField2.setVisible(false);
                 inputField3.setVisible(false);
+
+                inputPromptLabel1.setText("Flight ID:");
             }
         });
 
@@ -159,11 +201,22 @@ public class UserInterface extends JFrame {
         addBaggageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+//                selectedOperation = "add_baggage";  // 设置操作为添加行李
+//                inputPromptLabel1.setText("Flight ID:");
+//                inputPromptLabel2.setText("Number of Baggages:");
+//                inputPromptLabel3.setVisible(false);
+//                inputField3.setVisible(false);
                 selectedOperation = "add_baggage";  // 设置操作为添加行李
+                // 将所有输入框和标签设为可见
+                inputPromptLabel1.setVisible(true);
+                inputPromptLabel2.setVisible(true);
+                inputPromptLabel3.setVisible(false);  // 只需要两个输入
+                inputField1.setVisible(true);
+                inputField2.setVisible(true);
+                inputField3.setVisible(false);
+
                 inputPromptLabel1.setText("Flight ID:");
                 inputPromptLabel2.setText("Number of Baggages:");
-                inputPromptLabel3.setVisible(false);
-                inputField3.setVisible(false);
             }
         });
 
