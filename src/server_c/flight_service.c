@@ -29,6 +29,7 @@ const char *months[] = {
     "July", "August", "September", "October", "November", "December"
 };
 
+
 // 处理航班查询请求（通过出发地和目的地）
 void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *source, char *destination) {
     int found = 0;
@@ -69,81 +70,90 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *sour
         strcpy(response, "No flights found.\n");
     }
 
-    // 将查询结果发送回客户端
-    sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+    // 确认响应字符串长度并且以 \0 结尾
+    size_t response_len = strlen(response);
+    if (response[response_len - 1] != '\n') {
+        // 如果没有换行符，手动添加换行符
+        strcat(response, "\n");
+    }
+
+    // 发送响应到客户端
+    ssize_t sent_len = sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+    if (sent_len < 0) {
+        perror("Failed to send response");
+    } else {
+        printf("Response sent to client: %s\n", response);
+    }
 
     // 释放动态分配的内存
     free(response);
 }
 
+
+
 // 查询航班的函数
 void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request) {
     int flight_id, found = 0;
     char response[BUFFER_SIZE];  // 用于存储响应内容
-    memset(response, 0, BUFFER_SIZE);
+    memset(response, 0, BUFFER_SIZE);  // 确保缓冲区清空
 
     // 从客户端请求中提取航班ID
     sscanf(request, "query_flight_info %d", &flight_id);
-    printf("get form msg: flight_id=%d\n",flight_id);
+    printf("Received query: flight_id=%d\n", flight_id);
 
     // 遍历航班数组，查找匹配的航班ID
     for (int i = 0; i < flight_count; i++) {
-        printf("******************************iterating flight infos: now we are checking flight %d***********************\n",flights[i].flight_id);
+        printf("Checking flight %d...\n", flights[i].flight_id);
+
+        // 检查航班ID是否匹配
         if (flights[i].flight_id == flight_id) {
             char departure_time[100];  // 用于格式化时间
             
             // 使用月份名称格式化航班的出发时间为：Month day, year hour:minute
-            sprintf(departure_time, "%s %02d, %d %02d:%02d",
-                    months[flights[i].departure_time.month - 1],  // 通过数组查找月份名称
-                    flights[i].departure_time.day,
-                    flights[i].departure_time.year,
-                    flights[i].departure_time.hour,
-                    flights[i].departure_time.minute);
+            snprintf(departure_time, sizeof(departure_time), "%s %02d, %d %02d:%02d",
+                     months[flights[i].departure_time.month - 1],  // 通过数组查找月份名称
+                     flights[i].departure_time.day,
+                     flights[i].departure_time.year,
+                     flights[i].departure_time.hour,
+                     flights[i].departure_time.minute);
 
             // 格式化航班的全部信息，包括优化后的时间显示
-            sprintf(response, 
-                    "Flight ID: %d\n"
-                    "Source: %s\n"
-                    "Destination: %s\n"
-                    "Departure Time: %s\n"
-                    "Airfare: %.2f\n"
-                    "Seats Available: %d\n"
-                    "Baggage Availability: %d kg\n",
-                    flights[i].flight_id,
-                    flights[i].source_place,
-                    flights[i].destination_place,
-                    departure_time,  // 使用格式化后的时间
-                    flights[i].airfare,
-                    flights[i].seat_availability,
-                    flights[i].baggage_availability);
-            // 日志输出
-            printf("Flight ID: %d\n"
-                    "Source: %s\n"
-                    "Destination: %s\n"
-                    "Departure Time: %s\n"
-                    "Airfare: %.2f\n"
-                    "Seats Available: %d\n"
-                    "Baggage Availability: %d kg\n",
-                    flights[i].flight_id,
-                    flights[i].source_place,
-                    flights[i].destination_place,
-                    departure_time,  // 使用格式化后的时间
-                    flights[i].airfare,
-                    flights[i].seat_availability,
-                    flights[i].baggage_availability);
+            snprintf(response, sizeof(response),
+                     "Flight ID: %d\n"
+                     "Source: %s\n"
+                     "Destination: %s\n"
+                     "Departure Time: %s\n"
+                     "Airfare: %.2f\n"
+                     "Seats Available: %d\n"
+                     "Baggage Availability: %d kg\n",
+                     flights[i].flight_id,
+                     flights[i].source_place,
+                     flights[i].destination_place,
+                     departure_time,  // 使用格式化后的时间
+                     flights[i].airfare,
+                     flights[i].seat_availability,
+                     flights[i].baggage_availability);
+
+            // 输出日志以供调试
+            printf("Matched flight info:\n%s\n", response);
             found = 1;
             break;  // 找到匹配的航班后退出循环
         }
     }
-    //test:
-    printf("Generated response: %s\n", response);
+
     // 如果没有找到匹配的航班，返回错误消息
     if (!found) {
-        strcpy(response, "Flight not found.\n");
+        snprintf(response, sizeof(response), "Flight not found.\n");
     }
-    printf("Response being sent to client: %s\n", response);
+
+    // 输出生成的响应
+    printf("Generated response: %s\n", response);
+
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+
+    // 日志输出，确认发送
+    printf("Response sent to client: %s\n", response);
 }
 
 // 座位预定函数
