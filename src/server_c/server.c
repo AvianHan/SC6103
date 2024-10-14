@@ -29,6 +29,11 @@
 #define MAX_HISTORY 100
 #define SERVER_IP "172.20.10.10" // server IP
 
+
+Flight *flights = NULL;  // 初始化为 NULL
+int flight_count = 0;
+int max_flights = 100;
+
 // 互斥锁
 pthread_mutex_t flight_mutex = PTHREAD_MUTEX_INITIALIZER;
 
