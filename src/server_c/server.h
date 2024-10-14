@@ -12,11 +12,10 @@
 #pragma comment(lib, "ws2_32.lib")
 #endif
 #include <pthread.h>
-#include "server.h"
-
-//server.h
+#include <stdint.h>  // 添加这个来定义 uint8_t 和 uint32_t
 
 #define BUFFER_SIZE 1024
+
 
 // 航班结构体
 typedef struct {
@@ -62,11 +61,15 @@ int add_flight(int flight_id, const char *source, const char *destination, Depar
 
 
 // 航班服务头文件
+
+// Flight Service Function Declarations
 void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *source, char *destination);
-void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request);
+// void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+
 
 // 线程池头文件
 void thread_pool_init(int num_threads);

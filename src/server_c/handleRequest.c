@@ -2,14 +2,20 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef _WIN32
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-    #pragma comment(lib, "ws2_32.lib")
-#else
-    #include <arpa/inet.h>
-#endif
 
+#ifdef __linux__
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#elif _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#pragma comment(lib, "ws2_32.lib")
+#endif
+#include <pthread.h>
+#include "server.h"
 
 // 处理请求的函数
 void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, socklen_t len) {
@@ -26,7 +32,7 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
     } else if (strncmp(request, "query_flight_info", 17) == 0) {
         // 示例: 处理查询航班信息的逻辑
         printf("Received query_flight_info request\n");        
-        handle_query_details(sockfd, cliaddr, request);
+        handle_query_details(sockfd, &cliaddr, request);
         //strcpy(response, "Flight info: Flight 123, Departure: 10:00, Seats: 100");
     } else if (strncmp(request, "make_seat_reservation", 21) == 0) {
         // 示例: 处理预订座位的逻辑

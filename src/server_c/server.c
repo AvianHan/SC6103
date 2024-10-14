@@ -49,6 +49,7 @@ void store_in_history(struct sockaddr_in *client_addr, const char *request, cons
         strncpy(history[history_count].request, request, BUFFER_SIZE);
         strncpy(history[history_count].response, response, BUFFER_SIZE);
         history_count++;
+        printf("Storing request: %s with response: %s\n", request, response);
         printf("store msg in history!\n");
     }
     else

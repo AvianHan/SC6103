@@ -77,13 +77,13 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *sour
 }
 
 // 查询航班的函数
-void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
+void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request) {
     int flight_id, found = 0;
     char response[BUFFER_SIZE];  // 用于存储响应内容
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID
-    sscanf(buffer, "query_flight_info %d", &flight_id);
+    sscanf(request, "query_flight_info %d", &flight_id);
 
     // 遍历航班数组，查找匹配的航班ID
     for (int i = 0; i < flight_count; i++) {
