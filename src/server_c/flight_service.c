@@ -84,10 +84,11 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
 
     // 从客户端请求中提取航班ID
     sscanf(request, "query_flight_info %d", &flight_id);
-    printf("get form msg: flight_id=%d",flight_id);
+    printf("get form msg: flight_id=%d\n",flight_id);
 
     // 遍历航班数组，查找匹配的航班ID
     for (int i = 0; i < flight_count; i++) {
+        printf("******************************iterating flight infos: now we are checking flight %d***********************\n",flights[i].flight_id);
         if (flights[i].flight_id == flight_id) {
             char departure_time[100];  // 用于格式化时间
             
