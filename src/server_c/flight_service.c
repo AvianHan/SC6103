@@ -84,6 +84,7 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *sour
     } else {
         printf("Response sent to client: %s\n", response);
     }
+    printf("Response being sent to client: %s\n", response);
 
     // 释放动态分配的内存
     free(response);
