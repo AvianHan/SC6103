@@ -10,16 +10,19 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <fcntl.h> 
 #elif _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+
 #pragma comment(lib, "ws2_32.lib")
 #endif
 #include <pthread.h>
 #include "server.h"
 #include "communication.h" // 包含 marshalling 和 unmarshalling 功能
 #include <mysql/mysql.h>
+#include <fcntl.h> // for setting non-blocking mode
 
 #define PORT 8080
 #define BUFFER_SIZE 1024
@@ -46,6 +49,31 @@ typedef struct
 RequestHistory history[MAX_HISTORY];
 int history_count = 0;
 int use_at_least_once = 0; // Flag to toggle between at-least-once and at-most-once
+
+
+
+
+// 设置套接字为非阻塞模式的函数
+
+
+void set_nonblocking(int sockfd) {
+#ifdef _WIN32
+    // Windows 平台设置非阻塞模式
+    u_long mode = 1;  // 1 表示开启非阻塞模式
+    ioctlsocket(sockfd, FIONBIO, &mode);
+#else
+    // Linux/Unix 平台设置非阻塞模式
+    int flags = fcntl(sockfd, F_GETFL, 0);
+    if (flags == -1) {
+        perror("fcntl F_GETFL failed");
+        return;
+    }
+
+    if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) == -1) {
+        perror("fcntl F_SETFL failed");
+    }
+#endif
+}
 
 
 // ---- 1. Store history: 用于将处理过的请求和响应存储到历史记录中 ----
@@ -260,6 +288,9 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    // 设置套接字为非阻塞模式
+    set_nonblocking(sockfd);
+
     // 配置服务器地址
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -290,9 +321,30 @@ int main(int argc, char *argv[]) {
         printf("Now we are dealing with a message...\n");
         memset(buffer, 0, BUFFER_SIZE);
 
+        // 通过 select 来监控套接字可读性
+        fd_set read_fds;
+        FD_ZERO(&read_fds);
+        FD_SET(sockfd, &read_fds);
+
+        struct timeval timeout;
+        timeout.tv_sec = 5;
+        timeout.tv_usec = 0;
+
+        int activity = select(sockfd + 1, &read_fds, NULL, NULL, &timeout);
+        if (activity < 0) {
+            perror("select error");
+        } else if (activity == 0) {
+            printf("No activity within the timeout period.\n");
+            continue;
+        }
+
         // 接收客户端请求
         int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &addr_len);
         if (n < 0) {
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                printf("No data received yet.\n");
+                continue;
+            }
             perror("Receive failed");
             continue;
         }

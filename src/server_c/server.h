@@ -89,6 +89,8 @@ void* handle_client(void* arg);
 void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 
 
+void set_nonblocking(int sockfd);
+
 MYSQL* connect_db();
 void close_db(MYSQL *conn);
 void query_flights(MYSQL *conn);
