@@ -67,7 +67,7 @@ int add_flight(int flight_id, const char *source, const char *destination, Depar
 
 // Flight Service Function Declarations
 void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *source, char *destination);
-void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request);
+void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
 // void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *buffer);
@@ -80,7 +80,7 @@ void thread_pool_add_task(void (*function)(void *), void *arg);
 void thread_pool_destroy();
 
 // 服务器文件
-void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, socklen_t len);
+void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, socklen_t len, MYSQL *conn);
 void store_in_history(struct sockaddr_in* client_addr, const char* request, const char* response);
 int find_in_history(struct sockaddr_in* client_addr, const char* request, char* response);
 void* handle_client(void* arg);

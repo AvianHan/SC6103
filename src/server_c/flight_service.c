@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <mysql/mysql.h>
 
 #ifdef __linux__
 #include <arpa/inet.h>
@@ -90,8 +91,74 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *sour
 
 
 // 查询航班的函数
-void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request) {
+// void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request) {
+//     int flight_id, found = 0;
+//     char response[BUFFER_SIZE];  // 用于存储响应内容
+//     memset(response, 0, BUFFER_SIZE);  // 确保缓冲区清空
+
+//     // 从客户端请求中提取航班ID
+//     sscanf(request, "query_flight_info %d", &flight_id);
+//     printf("Received query: flight_id=%d\n", flight_id);
+
+//     // 遍历航班数组，查找匹配的航班ID
+//     for (int i = 0; i < flight_count; i++) {
+//         printf("Checking flight %d...\n", flights[i].flight_id);
+
+//         // 检查航班ID是否匹配
+//         if (flights[i].flight_id == flight_id) {
+//             char departure_time[100];  // 用于格式化时间
+            
+//             // 使用月份名称格式化航班的出发时间为：Month day, year hour:minute
+//             snprintf(departure_time, sizeof(departure_time), "%s %02d, %d %02d:%02d",
+//                      months[flights[i].departure_time.month - 1],  // 通过数组查找月份名称
+//                      flights[i].departure_time.day,
+//                      flights[i].departure_time.year,
+//                      flights[i].departure_time.hour,
+//                      flights[i].departure_time.minute);
+
+//             // 格式化航班的全部信息，包括优化后的时间显示
+//             snprintf(response, sizeof(response),
+//                      "Flight ID: %d\n"
+//                      "Source: %s\n"
+//                      "Destination: %s\n"
+//                      "Departure Time: %s\n"
+//                      "Airfare: %.2f\n"
+//                      "Seats Available: %d\n"
+//                      "Baggage Availability: %d kg\n",
+//                      flights[i].flight_id,
+//                      flights[i].source_place,
+//                      flights[i].destination_place,
+//                      departure_time,  // 使用格式化后的时间
+//                      flights[i].airfare,
+//                      flights[i].seat_availability,
+//                      flights[i].baggage_availability);
+
+//             // 输出日志以供调试
+//             printf("Matched flight info:\n%s\n", response);
+//             found = 1;
+//             break;  // 找到匹配的航班后退出循环
+//         }
+//     }
+
+//     // 如果没有找到匹配的航班，返回错误消息
+//     if (!found) {
+//         snprintf(response, sizeof(response), "Flight not found.\n");
+//     }
+
+//     // 输出生成的响应
+//     printf("Generated response: %s\n", response);
+
+//     // 将结果发送回客户端
+//     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+
+//     // 日志输出，确认发送
+//     printf("Response sent to client: %s\n", response);
+// }
+
+// 查询航班的函数，使用数据库查询航班信息
+void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
     int flight_id, found = 0;
+    char query[256];
     char response[BUFFER_SIZE];  // 用于存储响应内容
     memset(response, 0, BUFFER_SIZE);  // 确保缓冲区清空
 
@@ -99,44 +166,58 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
     sscanf(request, "query_flight_info %d", &flight_id);
     printf("Received query: flight_id=%d\n", flight_id);
 
-    // 遍历航班数组，查找匹配的航班ID
-    for (int i = 0; i < flight_count; i++) {
-        printf("Checking flight %d...\n", flights[i].flight_id);
+    // 构建SQL查询语句
+    snprintf(query, sizeof(query), "SELECT flight_id, source_place, destination_place, departure_year, departure_month, departure_day, departure_hour, departure_minute, airfare, seat_availability, baggage_availability FROM flights WHERE flight_id = %d", flight_id);
 
-        // 检查航班ID是否匹配
-        if (flights[i].flight_id == flight_id) {
-            char departure_time[100];  // 用于格式化时间
-            
-            // 使用月份名称格式化航班的出发时间为：Month day, year hour:minute
-            snprintf(departure_time, sizeof(departure_time), "%s %02d, %d %02d:%02d",
-                     months[flights[i].departure_time.month - 1],  // 通过数组查找月份名称
-                     flights[i].departure_time.day,
-                     flights[i].departure_time.year,
-                     flights[i].departure_time.hour,
-                     flights[i].departure_time.minute);
+    // 执行SQL查询
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "SELECT error: %s\n", mysql_error(conn));
+        snprintf(response, sizeof(response), "Database query failed.\n");
+        sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+        return;
+    }
 
-            // 格式化航班的全部信息，包括优化后的时间显示
-            snprintf(response, sizeof(response),
-                     "Flight ID: %d\n"
-                     "Source: %s\n"
-                     "Destination: %s\n"
-                     "Departure Time: %s\n"
-                     "Airfare: %.2f\n"
-                     "Seats Available: %d\n"
-                     "Baggage Availability: %d kg\n",
-                     flights[i].flight_id,
-                     flights[i].source_place,
-                     flights[i].destination_place,
-                     departure_time,  // 使用格式化后的时间
-                     flights[i].airfare,
-                     flights[i].seat_availability,
-                     flights[i].baggage_availability);
+    MYSQL_RES *res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "mysql_store_result() failed: %s\n", mysql_error(conn));
+        snprintf(response, sizeof(response), "Database error occurred.\n");
+        sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+        return;
+    }
 
-            // 输出日志以供调试
-            printf("Matched flight info:\n%s\n", response);
-            found = 1;
-            break;  // 找到匹配的航班后退出循环
-        }
+    MYSQL_ROW row;
+
+    // 遍历查询结果
+    while ((row = mysql_fetch_row(res))) {
+        char departure_time[100];
+
+        // 格式化航班的出发时间为：Month day, year hour:minute
+        snprintf(departure_time, sizeof(departure_time), "%s %02d, %d %02d:%02d",
+                 months[atoi(row[4]) - 1],  // 通过月份数组找到月份名称
+                 atoi(row[5]),               // day
+                 atoi(row[3]),               // year
+                 atoi(row[7]),               // hour
+                 atoi(row[8]));              // minute
+
+        // 格式化航班的全部信息，包括优化后的时间显示
+        snprintf(response + strlen(response), sizeof(response) - strlen(response),
+                 "Flight ID: %s\n"
+                 "Source: %s\n"
+                 "Destination: %s\n"
+                 "Departure Time: %s\n"
+                 "Airfare: %s\n"
+                 "Seats Available: %s\n"
+                 "Baggage Availability: %s kg\n\n",
+                 row[0],  // flight_id
+                 row[1],  // source_place
+                 row[2],  // destination_place
+                 departure_time,  // 格式化后的出发时间
+                 row[9],  // airfare
+                 row[10], // seat_availability
+                 row[11]  // baggage_availability
+        );
+
+        found = 1;
     }
 
     // 如果没有找到匹配的航班，返回错误消息
@@ -144,15 +225,16 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
         snprintf(response, sizeof(response), "Flight not found.\n");
     }
 
-    // 输出生成的响应
-    printf("Generated response: %s\n", response);
-
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 
-    // 日志输出，确认发送
+    // 释放查询结果
+    mysql_free_result(res);
+
+    // 输出生成的响应
     printf("Response sent to client: %s\n", response);
 }
+
 
 // 座位预定函数
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
