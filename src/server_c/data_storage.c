@@ -7,22 +7,47 @@
 #include <stdlib.h>
 
 
-Flight *flights = NULL;
-int flight_count = 0;
-int max_flights = 0;
 
 // 初始化航班信息
 void initialize_flights(int initial_capacity) {
     max_flights = initial_capacity;
     flights = (Flight *)malloc(max_flights * sizeof(Flight));
     if (flights == NULL) {
-        perror("Memory allocation failed");
+        perror("Memory allocation failed for flights");
         exit(EXIT_FAILURE);
     }
 
-    // 示例航班数据
-    flights[0] = (Flight){1, strdup("Singapore"), strdup("Tokyo"), {2024, 10, 12, 8, 0}, 500.0, 50, 100};
-    flights[1] = (Flight){2, strdup("Singapore"), strdup("New York"), {2024, 10, 13, 23, 0}, 1200.0, 30, 50};
+    // 示例航班数据，手动分配字符串以避免 strdup 失败风险
+    flights[0].flight_id = 1;
+    flights[0].source_place = malloc(strlen("Singapore") + 1);
+    flights[0].destination_place = malloc(strlen("Tokyo") + 1);
+    if (flights[0].source_place && flights[0].destination_place) {
+        strcpy(flights[0].source_place, "Singapore");
+        strcpy(flights[0].destination_place, "Tokyo");
+        flights[0].departure_time = (DepartureTime){2024, 10, 12, 8, 0};
+        flights[0].airfare = 500.0;
+        flights[0].seat_availability = 50;
+        flights[0].baggage_availability = 100;
+    } else {
+        perror("Memory allocation failed for flight strings");
+        exit(EXIT_FAILURE);
+    }
+
+    flights[1].flight_id = 2;
+    flights[1].source_place = malloc(strlen("Singapore") + 1);
+    flights[1].destination_place = malloc(strlen("New York") + 1);
+    if (flights[1].source_place && flights[1].destination_place) {
+        strcpy(flights[1].source_place, "Singapore");
+        strcpy(flights[1].destination_place, "New York");
+        flights[1].departure_time = (DepartureTime){2024, 10, 13, 23, 0};
+        flights[1].airfare = 1200.0;
+        flights[1].seat_availability = 30;
+        flights[1].baggage_availability = 50;
+    } else {
+        perror("Memory allocation failed for flight strings");
+        exit(EXIT_FAILURE);
+    }
+
     flight_count = 2;
 }
 
@@ -62,8 +87,17 @@ int add_flight(int flight_id, const char *source, const char *destination, Depar
     }
 
     flights[flight_count].flight_id = flight_id;
-    flights[flight_count].source_place = strdup(source);
-    flights[flight_count].destination_place = strdup(destination);
+
+    // 动态分配并复制字符串
+    flights[flight_count].source_place = malloc(strlen(source) + 1);
+    flights[flight_count].destination_place = malloc(strlen(destination) + 1);
+    if (flights[flight_count].source_place == NULL || flights[flight_count].destination_place == NULL) {
+        perror("Memory allocation failed for flight strings");
+        return -1;
+    }
+    strcpy(flights[flight_count].source_place, source);
+    strcpy(flights[flight_count].destination_place, destination);
+
     flights[flight_count].departure_time = departure_time;
     flights[flight_count].airfare = airfare;
     flights[flight_count].seat_availability = seat_availability;

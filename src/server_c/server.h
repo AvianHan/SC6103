@@ -43,6 +43,9 @@ struct client_data{
     socklen_t addr_len;
 };
 
+extern Flight *flights;
+extern int flight_count;
+extern int max_flights;
 
 // 回调处理头文件
 // void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_id, int monitor_interval);

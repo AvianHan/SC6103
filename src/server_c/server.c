@@ -26,6 +26,12 @@
 #define MAX_HISTORY 100
 #define SERVER_IP "172.20.10.10" // server IP
 
+
+Flight *flights;  // 定义为指针，不指定大小
+int flight_count = 0;  // 初始化航班计数
+int max_flights = 100; // 假设最大航班数为 100
+
+
 // 互斥锁
 pthread_mutex_t flight_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -40,6 +46,7 @@ typedef struct
 RequestHistory history[MAX_HISTORY];
 int history_count = 0;
 int use_at_least_once = 0; // Flag to toggle between at-least-once and at-most-once
+
 
 // ---- 1. Store history: 用于将处理过的请求和响应存储到历史记录中 ----
 void store_in_history(struct sockaddr_in *client_addr, const char *request, const char *response)
@@ -134,30 +141,82 @@ void *handle_client(void *arg)
 }
 
 
+// void* database_operations(void* arg) {
+//     // 连接到数据库
+//     MYSQL *conn = connect_db();
+
+//     // 查询并显示航班数据
+//     //printf("Current flights:\n");
+//     query_flights(conn);
+
+//     // 更新座位数（示例）
+//     int flight_id = 1; // 示例航班ID
+//     int seats_to_reserve = 2;
+//     printf("\nUpdating seats for flight %d\n", flight_id);
+//     update_seats(conn, flight_id, seats_to_reserve);
+
+//     // 更新行李（示例）
+//     int baggage_to_add = 10;
+//     printf("\nUpdating baggage for flight %d\n", flight_id);
+//     update_baggage(conn, flight_id, baggage_to_add);
+
+//     // 关闭数据库连接
+//     close_db(conn);
+
+//     return NULL;
+// }
+
 void* database_operations(void* arg) {
     // 连接到数据库
     MYSQL *conn = connect_db();
 
-    // 查询并显示航班数据
-    //printf("Current flights:\n");
-    query_flights(conn);
+    // 执行查询从数据库读取航班数据
+    MYSQL_RES *result;
+    MYSQL_ROW row;
 
-    // 更新座位数（示例）
-    int flight_id = 1; // 示例航班ID
-    int seats_to_reserve = 2;
-    printf("\nUpdating seats for flight %d\n", flight_id);
-    update_seats(conn, flight_id, seats_to_reserve);
+    // 执行查询以获取航班信息
+    if (mysql_query(conn, "SELECT flight_id, source_place, destination_place, departure_year, departure_month, departure_day, departure_hour, departure_minute, airfare, seat_availability, baggage_availability FROM flights")) {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        exit(1);
+    }
 
-    // 更新行李（示例）
-    int baggage_to_add = 10;
-    printf("\nUpdating baggage for flight %d\n", flight_id);
-    update_baggage(conn, flight_id, baggage_to_add);
+    result = mysql_store_result(conn);
+    if (result == NULL) {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        exit(1);
+    }
 
-    // 关闭数据库连接
+    // 遍历结果并填充到全局航班数组
+    flight_count = 0;
+    while ((row = mysql_fetch_row(result))) {
+        if (flight_count >= max_flights) {
+            printf("Warning: Reached maximum number of flights.\n");
+            break;
+        }
+
+        flights[flight_count].flight_id = atoi(row[0]);
+        flights[flight_count].source_place = strdup(row[1]);
+        flights[flight_count].destination_place = strdup(row[2]);
+
+        // 填充 DepartureTime 结构体
+        flights[flight_count].departure_time.year = atoi(row[3]);
+        flights[flight_count].departure_time.month = atoi(row[4]);
+        flights[flight_count].departure_time.day = atoi(row[5]);
+        flights[flight_count].departure_time.hour = atoi(row[6]);
+        flights[flight_count].departure_time.minute = atoi(row[7]);
+
+        flights[flight_count].airfare = atof(row[8]);
+        flights[flight_count].seat_availability = atoi(row[9]);
+        flights[flight_count].baggage_availability = atoi(row[10]);
+
+        flight_count++;
+    }
+
+    mysql_free_result(result);
     close_db(conn);
-
     return NULL;
 }
+
 
 int main(int argc, char *argv[]) {
     // 处理命令行参数

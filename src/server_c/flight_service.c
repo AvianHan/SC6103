@@ -20,9 +20,6 @@
 #define BUFFER_SIZE 1024
 #define MAX_LUGGAGE 400
 
-extern Flight *flights;
-extern int flight_count;
-
 // 定义月份名称的数组
 const char *months[] = {
     "January", "February", "March", "April", "May", "June",
