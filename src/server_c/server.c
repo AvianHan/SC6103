@@ -19,6 +19,7 @@
 #include <pthread.h>
 #include "server.h"
 #include "communication.h" // 包含 marshalling 和 unmarshalling 功能
+#include <mysql/mysql.h>
 
 #define PORT 8080
 #define BUFFER_SIZE 1024
@@ -132,51 +133,69 @@ void *handle_client(void *arg)
     return NULL;
 }
 
-int main(int argc, char *argv[])
-{
-#ifdef _WIN32
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-    {
-        perror("WSAStartup failed");
-        exit(EXIT_FAILURE);
-    }
-#endif
-    if (argc != 2)
-    {
+
+void* database_operations(void* arg) {
+    // 连接到数据库
+    MYSQL *conn = connect_db();
+
+    // 查询并显示航班数据
+    //printf("Current flights:\n");
+    query_flights(conn);
+
+    // 更新座位数（示例）
+    int flight_id = 1; // 示例航班ID
+    int seats_to_reserve = 2;
+    printf("\nUpdating seats for flight %d\n", flight_id);
+    update_seats(conn, flight_id, seats_to_reserve);
+
+    // 更新行李（示例）
+    int baggage_to_add = 10;
+    printf("\nUpdating baggage for flight %d\n", flight_id);
+    update_baggage(conn, flight_id, baggage_to_add);
+
+    // 关闭数据库连接
+    close_db(conn);
+
+    return NULL;
+}
+
+int main(int argc, char *argv[]) {
+    // 处理命令行参数
+    if (argc != 2) {
         printf("Usage: %s [at-least-once | at-most-once]\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
-    if (strcmp(argv[1], "at-least-once") == 0)
-    {
-        use_at_least_once = 1; // 设置标志为 at-least-once
+    if (strcmp(argv[1], "at-least-once") == 0) {
+        use_at_least_once = 1;  // 设置标志为 at-least-once
         printf("Running with at-least-once fault tolerance.\n");
-    }
-    else if (strcmp(argv[1], "at-most-once") == 0)
-    {
-        use_at_least_once = 0; // 设置标志为 at-most-once
+    } else if (strcmp(argv[1], "at-most-once") == 0) {
+        use_at_least_once = 0;  // 设置标志为 at-most-once
         printf("Running with at-most-once fault tolerance.\n");
-    }
-    else
-    {
+    } else {
         printf("Invalid argument. Use 'at-least-once' or 'at-most-once'.\n");
         exit(EXIT_FAILURE);
     }
 
+#ifdef _WIN32
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        perror("WSAStartup failed");
+        exit(EXIT_FAILURE);
+    }
+#endif
+
     int sockfd;
     struct sockaddr_in server_addr, client_addr;
     char *buffer = (char *)malloc(BUFFER_SIZE * sizeof(char));
-    if (buffer == NULL)
-    {
+    if (buffer == NULL) {
         perror("Memory allocation failed");
         exit(EXIT_FAILURE);
     }
     socklen_t addr_len = sizeof(client_addr);
 
     // 创建UDP套接字
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-    {
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("Socket creation failed");
         free(buffer);
         exit(EXIT_FAILURE);
@@ -189,8 +208,7 @@ int main(int argc, char *argv[])
     server_addr.sin_port = htons(PORT);
 
     // 绑定套接字到指定端口
-    if (bind(sockfd, (const struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-    {
+    if (bind(sockfd, (const struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
         perror("Bind failed");
         close(sockfd);
         free(buffer);
@@ -199,27 +217,31 @@ int main(int argc, char *argv[])
 
     printf("Server is running on port %d...\n", PORT);
 
+    // 启动一个线程来执行数据库操作
+    pthread_t db_thread;
+    if (pthread_create(&db_thread, NULL, database_operations, NULL) != 0) {
+        perror("Database thread creation failed");
+        close(sockfd);
+        free(buffer);
+        exit(EXIT_FAILURE);
+    }
+
     // 主循环：处理客户端请求
-    while (1)
-    {
-        printf("now we are dealing msg......\n");
+    while (1) {
+        printf("Now we are dealing with a message...\n");
         memset(buffer, 0, BUFFER_SIZE);
-        // char reply[BUFFER_SIZE];
 
         // 接收客户端请求
         int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &addr_len);
-        if (n < 0)
-        {
+        if (n < 0) {
             perror("Receive failed");
             continue;
         }
 
-      
         // 为每个请求创建一个新的线程并传递给 handleRequest 函数处理
         pthread_t client_thread;
         struct client_data *data = malloc(sizeof(struct client_data));
-        if (!data)
-        {
+        if (!data) {
             perror("Malloc failed");
             continue;
         }
@@ -230,25 +252,20 @@ int main(int argc, char *argv[])
         data->sockfd = sockfd;
         data->addr_len = addr_len;
 
-        if (pthread_create(&client_thread, NULL, handle_client, (void *)data) != 0)
-        {
+        if (pthread_create(&client_thread, NULL, handle_client, (void *)data) != 0) {
             perror("Client thread creation failed");
             free(data);
-        }                                                                    
-        printf("thread created! MSG goes in handle_client.\n");
-        // char reply[BUFFER_SIZE];
-
-        // 发送响应给客户端（无论是新请求还是重复请求）
-        // printf("sending reply!\n");
-        // sendto(sockfd, reply, strlen(reply), 0, (struct sockaddr *)&client_addr, addr_len);
-        // 分离线程，使其可以自动释放资源，不阻塞主线程
+        }
         pthread_detach(client_thread);
     }
 
 #ifdef _WIN32
     WSACleanup();
 #endif
-    printf("gonna exit!\n");
+
+    // 等待数据库线程完成
+    pthread_join(db_thread, NULL);
+
     close(sockfd);
     free(buffer);
     return 0;

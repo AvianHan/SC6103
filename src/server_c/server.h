@@ -13,7 +13,7 @@
 #endif
 #include <pthread.h>
 #include <stdint.h>  // 添加这个来定义 uint8_t 和 uint32_t
-
+#include <mysql/mysql.h>
 #define BUFFER_SIZE 1024
 
 
@@ -84,5 +84,13 @@ void* handle_client(void* arg);
 
 // request_handler.c
 void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+
+
+MYSQL* connect_db();
+void close_db(MYSQL *conn);
+void query_flights(MYSQL *conn);
+void update_seats(MYSQL *conn, int flight_id, int seats_reserved);
+void update_baggage(MYSQL *conn, int flight_id, int baggage_added);
+void close_db(MYSQL *conn);
 
 #endif // SERVER_H

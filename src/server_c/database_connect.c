@@ -11,6 +11,8 @@
 #define PASS "root"
 #define DB "flight_system"
 
+//database_connect.c
+
 // 连接到数据库的函数
 MYSQL* connect_db() {
     MYSQL *conn = mysql_init(NULL);
@@ -62,13 +64,13 @@ void query_flights(MYSQL *conn) {
         flight.baggage_availability = atoi(row[10]);
 
         // 打印航班信息
-        printf("Flight ID: %d\n", flight.flight_id);
-        printf("Source: %s\n", flight.source_place);
-        printf("Destination: %s\n", flight.destination_place);
-        printf("Departure Time: %d-%d-%d %d:%d\n", flight.departure_time.year, flight.departure_time.month, flight.departure_time.day, flight.departure_time.hour, flight.departure_time.minute);
-        printf("Airfare: %.2f\n", flight.airfare);
-        printf("Seats Available: %d\n", flight.seat_availability);
-        printf("Baggage Availability: %d\n\n", flight.baggage_availability);
+        //printf("Flight ID: %d\n", flight.flight_id);
+        //printf("Source: %s\n", flight.source_place);
+        //printf("Destination: %s\n", flight.destination_place);
+        //printf("Departure Time: %d-%d-%d %d:%d\n", flight.departure_time.year, flight.departure_time.month, flight.departure_time.day, flight.departure_time.hour, flight.departure_time.minute);
+        //printf("Airfare: %.2f\n", flight.airfare);
+        //printf("Seats Available: %d\n", flight.seat_availability);
+        //printf("Baggage Availability: %d\n\n", flight.baggage_availability);
     }
 
     mysql_free_result(result);
@@ -150,11 +152,14 @@ void update_baggage(MYSQL *conn, int flight_id, int baggage_added) {
     mysql_free_result(result);
 }
 
+
+
 // 关闭数据库连接的函数
 void close_db(MYSQL *conn) {
     mysql_close(conn);
 }
 
+/*
 int main() {
     // 连接到数据库
     MYSQL *conn = connect_db();
@@ -179,3 +184,4 @@ int main() {
 
     return 0;
 }
+*/
