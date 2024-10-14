@@ -102,7 +102,7 @@ void *handle_client(void *arg)
         else
         {
             // At-most-once: 检查历史记录，避免重复处理
-            if (find_in_history(data->client_addr, data->buffer, reply))
+            if (find_in_history(&data->client_addr, data->buffer, reply))
             {
                 // ---- 3. Re-reply: 找到重复请求，直接返回历史响应 ----
                 printf("Duplicate request found (At-most-once), sending cached response.\n");
@@ -117,13 +117,14 @@ void *handle_client(void *arg)
                 snprintf(reply, sizeof(reply), "Response to: %s", data->buffer);
 
                 // 将请求和响应存储到历史记录中 (Store history)
-                store_in_history(data->client_addr, data->buffer, reply);
+                store_in_history(&data->client_addr, data->buffer, reply);
             }
         }
     // 调用 handleRequest 函数处理接收到的请求
     // handleRequest(data->buffer, data->client_addr, data->sockfd, data->addr_len);
     printf("sending reply!\n");
-    sendto(data->sockfd, reply, strlen(reply), 0, (struct sockaddr *)data->client_addr, data->addr_len);
+    sendto(data->sockfd, reply, strlen(reply), 0, (struct sockaddr *)&data->client_addr, data->addr_len);
+
     // 释放动态分配的内存
     free(data);
 
