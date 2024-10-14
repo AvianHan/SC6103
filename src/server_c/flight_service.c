@@ -84,6 +84,7 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
 
     // 从客户端请求中提取航班ID
     sscanf(request, "query_flight_info %d", &flight_id);
+    printf("get form msg: flight_id=%d",flight_id);
 
     // 遍历航班数组，查找匹配的航班ID
     for (int i = 0; i < flight_count; i++) {
@@ -114,21 +115,32 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
                     flights[i].airfare,
                     flights[i].seat_availability,
                     flights[i].baggage_availability);
+            // 日志输出
+            printf("Flight ID: %d\n"
+                    "Source: %s\n"
+                    "Destination: %s\n"
+                    "Departure Time: %s\n"
+                    "Airfare: %.2f\n"
+                    "Seats Available: %d\n"
+                    "Baggage Availability: %d kg\n",
+                    flights[i].flight_id,
+                    flights[i].source_place,
+                    flights[i].destination_place,
+                    departure_time,  // 使用格式化后的时间
+                    flights[i].airfare,
+                    flights[i].seat_availability,
+                    flights[i].baggage_availability);
             found = 1;
             break;  // 找到匹配的航班后退出循环
         }
     }
-
     //test:
     printf("Generated response: %s\n", response);
-
     // 如果没有找到匹配的航班，返回错误消息
     if (!found) {
         strcpy(response, "Flight not found.\n");
     }
-    
     printf("Response being sent to client: %s\n", response);
-
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 }
