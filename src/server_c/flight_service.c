@@ -119,10 +119,15 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
         }
     }
 
+    //test:
+    printf("Generated response: %s\n", response);
+
     // 如果没有找到匹配的航班，返回错误消息
     if (!found) {
         strcpy(response, "Flight not found.\n");
     }
+    
+    printf("Response being sent to client: %s\n", response);
 
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
