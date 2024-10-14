@@ -49,7 +49,17 @@ RequestHistory history[MAX_HISTORY];
 int history_count = 0;
 int use_at_least_once = 0; // Flag to toggle between at-least-once and at-most-once
 
+/*
+struct client_data
+{
+    char buffer[BUFFER_SIZE];
+    struct sockaddr_in client_addr;
+    int sockfd;
+    socklen_t addr_len;
+     MYSQL *conn; // 新增：数据库连接
+};
 
+*/
 
 
 // 设置套接字为非阻塞模式的函数
@@ -113,14 +123,6 @@ int find_in_history(struct sockaddr_in *client_addr, const char *request, char *
 // 处理客户端请求的线程
 void *handle_client(void *arg)
 {
-    struct client_data
-    {
-        char buffer[BUFFER_SIZE];
-        struct sockaddr_in client_addr;
-        int sockfd;
-        socklen_t addr_len;
-        MYSQL *conn; // 新增：数据库连接
-    };
 
     struct client_data *data = (struct client_data *)arg;
     char reply[BUFFER_SIZE];

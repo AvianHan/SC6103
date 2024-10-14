@@ -41,6 +41,7 @@ struct client_data{
     struct sockaddr_in client_addr;
     int sockfd;
     socklen_t addr_len;
+    MYSQL *conn; // 新增：数据库连接
 };
 
 extern Flight *flights;
@@ -49,7 +50,7 @@ extern int max_flights;
 
 // 回调处理头文件
 // void register_callback(int sockfd, struct sockaddr_in *client_addr, int flight_id, int monitor_interval);
-void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer, MYSQL *conn);
 void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int flight_id);
 void* monitor_flights(void* arg);
 // 在适当的头文件中声明
@@ -68,6 +69,7 @@ int add_flight(int flight_id, const char *source, const char *destination, Depar
 // Flight Service Function Declarations
 void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *source, char *destination);
 void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
+
 // void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *buffer);
@@ -85,8 +87,7 @@ void store_in_history(struct sockaddr_in* client_addr, const char* request, cons
 int find_in_history(struct sockaddr_in* client_addr, const char* request, char* response);
 void* handle_client(void* arg);
 
-// request_handler.c
-void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+
 
 
 void set_nonblocking(int sockfd);

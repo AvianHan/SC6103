@@ -33,11 +33,9 @@ ClientMonitor client_monitors[100];  // 假设最多有100个客户端监控
 int client_monitor_count = 0;
 
 extern pthread_mutex_t flight_mutex;  // 互斥锁
-
 // 处理客户端请求
-void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer) {
+void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer, MYSQL *conn) {
     char command[20];
-
     sscanf(buffer, "%s", command);
 
     uint32_t flight_data_length;
@@ -48,11 +46,14 @@ void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *bu
         // 提取航班的出发地和目的地
         char* source = flight->source_place;
         char* destination = flight->destination_place;
-        handle_query_flight(sockfd, client_addr, source, destination);
-        free(flight->source_place);
+        
+        // 调用 handle_query_details 并传递数据库连接 conn
+        handle_query_details(sockfd, client_addr, buffer, conn);
+        
+        free(flight->source_place);  // 释放动态分配的字符串
         free(flight->destination_place);
     } else if (strcmp(command, "QUERY_FLIGHT_ID") == 0) {
-        handle_query_details(sockfd, client_addr, buffer);
+        handle_query_details(sockfd, client_addr, buffer, conn);
     } else if (strcmp(command, "RESERVE") == 0) {
         handle_reservation(sockfd, client_addr, buffer);
     } else if (strcmp(command, "ADD_BAGGAGE") == 0) {
@@ -67,7 +68,8 @@ void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *bu
         char error_msg[BUFFER_SIZE];
         strcpy(error_msg, "Invalid command");
         sendto(sockfd, error_msg, strlen(error_msg), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-    }    
+    }
+    
     free(flight);  // 释放 Flight 结构体的内存
 }
 
