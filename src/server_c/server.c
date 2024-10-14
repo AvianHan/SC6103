@@ -86,11 +86,44 @@ void *handle_client(void *arg)
         socklen_t addr_len;
     };
 
-    struct client_data *data = (struct client_data *)arg;
-    printf("handle_client: transfer into handleRequest!\n");
-    // 调用 handleRequest 函数处理接收到的请求
-    handleRequest(data->buffer, data->client_addr, data->sockfd, data->addr_len);
 
+    struct client_data *data = (struct client_data *)arg;
+    char reply[BUFFER_SIZE];
+    printf("handle_client: transfer into handleRequest!\n");
+    if (use_at_least_once)
+        {
+            // At-least-once: 直接重新执行请求
+            printf("Processing new request (At-least-once): %s\n", data->buffer);
+            handleRequest(data->buffer, data->client_addr, data->sockfd, data->addr_len);
+
+            // 生成新的响应
+            snprintf(reply, sizeof(reply), "Response to: %s", data->buffer);
+        }
+        else
+        {
+            // At-most-once: 检查历史记录，避免重复处理
+            if (find_in_history(data->client_addr, data->buffer, reply))
+            {
+                // ---- 3. Re-reply: 找到重复请求，直接返回历史响应 ----
+                printf("Duplicate request found (At-most-once), sending cached response.\n");
+            }
+            else
+            {
+                // 没有找到重复请求，处理客户端请求
+                printf("Processing new request (At-most-once): %s\n", data->buffer);
+                handleRequest(data->buffer, data->client_addr, data->sockfd, data->addr_len);
+
+                // 生成新的响应
+                snprintf(reply, sizeof(reply), "Response to: %s", data->buffer);
+
+                // 将请求和响应存储到历史记录中 (Store history)
+                store_in_history(data->client_addr, data->buffer, reply);
+            }
+        }
+    // 调用 handleRequest 函数处理接收到的请求
+    // handleRequest(data->buffer, data->client_addr, data->sockfd, data->addr_len);
+    printf("sending reply!\n");
+    sendto(data->sockfd, reply, strlen(reply), 0, (struct sockaddr *)data->client_addr, data->addr_len);
     // 释放动态分配的内存
     free(data);
 
@@ -169,7 +202,7 @@ int main(int argc, char *argv[])
     {
         printf("now we are dealing msg......\n");
         memset(buffer, 0, BUFFER_SIZE);
-        char reply[BUFFER_SIZE];
+        // char reply[BUFFER_SIZE];
 
         // 接收客户端请求
         int n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &addr_len);
@@ -201,41 +234,13 @@ int main(int argc, char *argv[])
             free(data);
         }                                                                    
         printf("thread created! MSG goes in handle_client.\n");
-        if (use_at_least_once)
-        {
-            // At-least-once: 直接重新执行请求
-            printf("Processing new request (At-least-once): %s\n", buffer);
-            handle_client_request(sockfd, &client_addr, buffer);
-
-            // 生成新的响应
-            snprintf(reply, sizeof(reply), "Response to: %s", buffer);
-        }
-        else
-        {
-            // At-most-once: 检查历史记录，避免重复处理
-            if (find_in_history(&client_addr, buffer, reply))
-            {
-                // ---- 3. Re-reply: 找到重复请求，直接返回历史响应 ----
-                printf("Duplicate request found (At-most-once), sending cached response.\n");
-            }
-            else
-            {
-                // 没有找到重复请求，处理客户端请求
-                printf("Processing new request (At-most-once): %s\n", buffer);
-                handle_client_request(sockfd, &client_addr, buffer);
-
-                // 生成新的响应
-                snprintf(reply, sizeof(reply), "Response to: %s", buffer);
-
-                // 将请求和响应存储到历史记录中 (Store history)
-                store_in_history(&client_addr, buffer, reply);
-            }
-        }
         // char reply[BUFFER_SIZE];
 
         // 发送响应给客户端（无论是新请求还是重复请求）
-        printf("sending reply!\n");
-        sendto(sockfd, reply, strlen(reply), 0, (struct sockaddr *)&client_addr, addr_len);
+        // printf("sending reply!\n");
+        // sendto(sockfd, reply, strlen(reply), 0, (struct sockaddr *)&client_addr, addr_len);
+        // 分离线程，使其可以自动释放资源，不阻塞主线程
+        pthread_detach(client_thread);
     }
 
 #ifdef _WIN32
