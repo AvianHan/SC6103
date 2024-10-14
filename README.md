@@ -220,7 +220,8 @@ printed on the screen.
 ### 如何使用：
 编译并运行服务器：
 
-	gcc server.c callback_handler.c data_storage.c flight_service.c thread_pool.c marshalling.c unmarshalling.c -o server -lpthread -lws2_32
+	gcc server.c callback_handler.c data_storage.c flight_service.c thread_pool.c marshalling.c unmarshalling.c handleRequest.c -o server -lpthread -lws2_32
+
 
 运行服务器并选择容错机制：
 
