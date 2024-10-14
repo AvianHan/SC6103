@@ -25,8 +25,9 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
         strcpy(response, "Flight ID list: 123, 456, 789");
     } else if (strncmp(request, "query_flight_info", 17) == 0) {
         // 示例: 处理查询航班信息的逻辑
-        printf("Received query_flight_info request\n");
-        strcpy(response, "Flight info: Flight 123, Departure: 10:00, Seats: 100");
+        printf("Received query_flight_info request\n");        
+        handle_query_details(sockfd, cliaddr, request);
+        //strcpy(response, "Flight info: Flight 123, Departure: 10:00, Seats: 100");
     } else if (strncmp(request, "make_seat_reservation", 21) == 0) {
         // 示例: 处理预订座位的逻辑
         printf("Received make_seat_reservation request\n");
