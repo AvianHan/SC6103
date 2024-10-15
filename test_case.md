@@ -52,4 +52,6 @@ after
 
 
 102:
+before
 ![alt text](image-21.png)
+![image](https://github.com/user-attachments/assets/bb44c605-ae94-43ad-a1c1-0bda3823def1)
