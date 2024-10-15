@@ -27,6 +27,7 @@
 typedef struct {
     struct sockaddr_in client_addr;
     int flight_id;
+    int seat_availability;
 } ClientMonitor;
 
 ClientMonitor client_monitors[100];  // 假设最多有100个客户端监控
@@ -49,30 +50,6 @@ void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int fl
     sprintf(response, "Registered for flight %d seat availability updates\n", flight_id);
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 }
-
-// 航班监控线程函数
-// void* monitor_flights(void* arg) {
-//     int sockfd = *(int*)arg;
-
-//     while (1) {
-//         pthread_mutex_lock(&flight_mutex);
-//         // 假设航班的 seat_availability 发生变化
-//         for (int i = 0; i < client_monitor_count; i++) {
-//             int flight_id = client_monitors[i].flight_id;
-//             // 这里应该检查 flight_id 对应的航班是否有座位更新
-//             // 如果更新，向客户端发送通知
-//             char response[BUFFER_SIZE];
-//             sprintf(response, "Flight %d updated seat availability\n", flight_id);
-//             sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)&client_monitors[i].client_addr, sizeof(client_monitors[i].client_addr));
-//         }
-//         pthread_mutex_unlock(&flight_mutex);
-
-//         sleep(5);  // 每5秒检查一次航班状态
-//     }
-
-//     return NULL;
-// }
-
 
 // 航班监控线程函数
 void* monitor_flights(void* arg) {
@@ -112,10 +89,10 @@ void* monitor_flights(void* arg) {
                 int current_seat_availability = atoi(row[0]);
 
                 // 比较当前座位可用数量是否变化
-                for (int j = 0; j < flight_status_count; j++) {
-                    if (flight_status[j].flight_id == flight_id) {
-                        if (flight_status[j].seat_availability != current_seat_availability) {
-                            flight_status[j].seat_availability = current_seat_availability;  // 更新状态
+                for (int j = 0; j < client_monitor_count; j++) {
+                    if (client_monitors[j].flight_id == flight_id) {
+                        if (client_monitors[j].seat_availability != current_seat_availability) {
+                            client_monitors[j].seat_availability = current_seat_availability;  // 更新状态
 
                             // 通知注册监控该航班的客户端
                             char response[BUFFER_SIZE];
