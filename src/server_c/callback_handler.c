@@ -3,17 +3,19 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef __linux__
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#elif _WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
 #pragma comment(lib, "ws2_32.lib")
+#else
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #endif
+
+
 #include <pthread.h>
 #include "server.h"
 
@@ -35,6 +37,29 @@ int client_monitor_count = 0;
 extern pthread_mutex_t flight_mutex; // 互斥锁
 
 // 注册客户端监控航班
+// void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int flight_id)
+// {
+//     pthread_mutex_lock(&flight_mutex);
+
+//     // 注册客户端
+//     client_monitors[client_monitor_count].client_addr = *client_addr;
+//     client_monitors[client_monitor_count].flight_id = flight_id;
+//     client_monitor_count++;
+
+//     pthread_mutex_unlock(&flight_mutex);
+
+//     char response[BUFFER_SIZE];
+
+//     // 打印注册客户端的 IP 地址和端口号
+//     char client_ip[INET_ADDRSTRLEN];
+//     inet_ntop(AF_INET, &(client_addr->sin_addr), client_ip, INET_ADDRSTRLEN);
+//     int client_port = ntohs(client_addr->sin_port);
+//     printf("Client registered for flight %d seat updates from IP: %s, Port: %d\n", flight_id, client_ip, client_port);
+
+//     sprintf(response, "Registered for flight %d seat availability updates\n", flight_id);
+//     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+// }
+
 void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int flight_id)
 {
     pthread_mutex_lock(&flight_mutex);
@@ -46,11 +71,11 @@ void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int fl
 
     pthread_mutex_unlock(&flight_mutex);
 
+    // 向客户端发送注册成功的响应
     char response[BUFFER_SIZE];
     sprintf(response, "Registered for flight %d seat availability updates\n", flight_id);
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 }
-
 // 航班监控线程函数
 // void *monitor_flights(void *arg)
 // {
