@@ -13,5 +13,6 @@
 flight_id=10
 ![alt text](image-3.png)
 ![image](https://github.com/user-attachments/assets/5dc80407-bcbe-44b6-991d-4e686db3a49d)
-
+flight_id=26
+![alt text](image-4.png)
 3. 
