@@ -18,7 +18,7 @@
 #include <pthread.h>
 #include "server.h"
 
-处理请求的函数
+// 处理请求的函数
 void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, socklen_t len, MYSQL *conn) {
     char response[1024];
 
