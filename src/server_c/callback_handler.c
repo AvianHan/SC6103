@@ -113,7 +113,7 @@ void* monitor_flights(void* arg) {
         }
 
         pthread_mutex_unlock(&flight_mutex);
-
+        printf("check in flight seat availability");
         sleep(5);  // 每5秒查询一次数据库
     }
 
