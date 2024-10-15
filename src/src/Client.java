@@ -15,6 +15,7 @@ public class Client {
         try {
             socket = new DatagramSocket();
             serverAddress = InetAddress.getByName("172.20.10.10");  // 假设服务器
+            startListeningToServer();
         } catch (SocketException | UnknownHostException e) {
             e.printStackTrace();
         }
@@ -108,7 +109,6 @@ public class Client {
     }
 
 
-
     // 发送请求到服务器
     private void sendRequest(String request) {
         try {
@@ -118,7 +118,7 @@ public class Client {
             socket.send(packet);
 
             // 启动线程接收服务器响应
-            new Thread(new ResponseListener()).start();
+//            new Thread(new ResponseListener()).start();
             System.out.println("sendRequest done");
         } catch (IOException e) {
             if (userInterface != null) {
@@ -129,37 +129,50 @@ public class Client {
     }
 
 
+    // 启动服务器消息监听线程
+    public void startListeningToServer() {
+        new Thread(new ResponseListener()).start();
+    }
+
     // 监听服务器响应
     private class ResponseListener implements Runnable {
         @Override
         public void run() {
             try {
-                // 设置超时，单位为毫秒
-                socket.setSoTimeout(60000);  // 超时时间为10秒
+                // 设置socket超时时间
+                socket.setSoTimeout(60000);  // 超时时间为60秒
 
-                byte[] buffer = new byte[1024];
-                DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
-                System.out.println("Waiting for server response...");
-                socket.receive(responsePacket);  // 接收服务器的响应
+                // 持续监听服务器的响应
+                while (true) {
+                    try {
+                        byte[] buffer = new byte[1024];
+                        DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
+                        System.out.println("Waiting for server response...");
+                        socket.receive(responsePacket);  // 接收服务器的响应
 
-                String response = new String(responsePacket.getData(), 0, responsePacket.getLength());
-                System.out.println("Received response from server: " + response);
+                        // 解析服务器的响应
+                        String response = new String(responsePacket.getData(), 0, responsePacket.getLength());
+                        System.out.println("Received response from server: " + response);
 
-                // 将响应结果显示在用户界面上
-                if (userInterface != null) {
-                    userInterface.displayResponse("Response: " + response);
-                }
+                        // 将响应结果显示在用户界面上
+                        if (userInterface != null) {
+                            userInterface.displayResponse("Response: " + response);
+                        }
 
-            } catch (SocketTimeoutException e) {
-                System.out.println("Request timed out: No response from server within the timeout period.");
-                if (userInterface != null) {
-                    userInterface.displayResponse("Request timed out: No response from server.");
+                    } catch (SocketTimeoutException e) {
+                        System.out.println("Request timed out: No response from server within the timeout period.");
+                        if (userInterface != null) {
+                            userInterface.displayResponse("Request timed out: No response from server.");
+                        }
+                    }
                 }
             } catch (IOException e) {
                 if (userInterface != null) {
                     userInterface.displayResponse("Error receiving response: " + e.getMessage());
                 }
+                System.out.println("Error receiving response: " + e.getMessage());
             }
         }
     }
+
 }
