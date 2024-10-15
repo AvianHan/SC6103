@@ -12,5 +12,6 @@
 2. query_flight_info 
 flight_id=10
 ![alt text](image-3.png)
+![image](https://github.com/user-attachments/assets/5dc80407-bcbe-44b6-991d-4e686db3a49d)
 
 3. 
