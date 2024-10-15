@@ -34,44 +34,44 @@ int client_monitor_count = 0;
 
 extern pthread_mutex_t flight_mutex;  // 互斥锁
 // 处理客户端请求
-void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer, MYSQL *conn) {
-    char command[20];
-    sscanf(buffer, "%s", command);
+// void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer, MYSQL *conn) {
+//     char command[20];
+//     sscanf(buffer, "%s", command);
 
-    uint32_t flight_data_length;
-    // 通过 unmarshall 解析出 Flight 结构体
-    Flight* flight = unmarshal_flight((uint8_t*)(buffer + strlen(command) + 1), &flight_data_length);
+//     uint32_t flight_data_length;
+//     // 通过 unmarshall 解析出 Flight 结构体
+//     Flight* flight = unmarshal_flight((uint8_t*)(buffer + strlen(command) + 1), &flight_data_length);
 
-    if (strcmp(command, "QUERY_FLIGHT") == 0) {
-        // 提取航班的出发地和目的地
-        char* source = flight->source_place;
-        char* destination = flight->destination_place;
+//     if (strcmp(command, "QUERY_FLIGHT") == 0) {
+//         // 提取航班的出发地和目的地
+//         char* source = flight->source_place;
+//         char* destination = flight->destination_place;
         
-        // 调用 handle_query_details 并传递数据库连接 conn
-        handle_query_details(sockfd, client_addr, buffer, conn);
+//         // 调用 handle_query_details 并传递数据库连接 conn
+//         handle_query_details(sockfd, client_addr, buffer, conn);
         
-        free(flight->source_place);  // 释放动态分配的字符串
-        free(flight->destination_place);
-    } else if (strcmp(command, "QUERY_FLIGHT_ID") == 0) {
-        handle_query_details(sockfd, client_addr, buffer, conn);
-    } else if (strcmp(command, "RESERVE") == 0) {
-        handle_reservation(sockfd, client_addr, buffer, conn);
-    } else if (strcmp(command, "ADD_BAGGAGE") == 0) {
-        handle_add_baggage(sockfd, client_addr, buffer, conn);
-    } else if(strcmp(command, "QUERY_BAGGAGE") == 0) {
-        handle_query_baggage_availability(sockfd, client_addr, buffer, conn);
-    } else if(strcmp(command, "MONITOR_FLIGHT") == 0) {
-        int flight_id;
-        sscanf(buffer, "MONITOR_FLIGHT %d", &flight_id);
-        register_flight_monitor(sockfd, client_addr, flight_id);
-    } else {
-        char error_msg[BUFFER_SIZE];
-        strcpy(error_msg, "Invalid command");
-        sendto(sockfd, error_msg, strlen(error_msg), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-    }
+//         free(flight->source_place);  // 释放动态分配的字符串
+//         free(flight->destination_place);
+//     } else if (strcmp(command, "QUERY_FLIGHT_ID") == 0) {
+//         handle_query_details(sockfd, client_addr, buffer, conn);
+//     } else if (strcmp(command, "RESERVE") == 0) {
+//         handle_reservation(sockfd, client_addr, buffer, conn);
+//     } else if (strcmp(command, "ADD_BAGGAGE") == 0) {
+//         handle_add_baggage(sockfd, client_addr, buffer, conn);
+//     } else if(strcmp(command, "QUERY_BAGGAGE") == 0) {
+//         handle_query_baggage_availability(sockfd, client_addr, buffer, conn);
+//     } else if(strcmp(command, "MONITOR_FLIGHT") == 0) {
+//         int flight_id;
+//         sscanf(buffer, "MONITOR_FLIGHT %d", &flight_id);
+//         register_flight_monitor(sockfd, client_addr, flight_id);
+//     } else {
+//         char error_msg[BUFFER_SIZE];
+//         strcpy(error_msg, "Invalid command");
+//         sendto(sockfd, error_msg, strlen(error_msg), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+//     }
     
-    free(flight);  // 释放 Flight 结构体的内存
-}
+//     free(flight);  // 释放 Flight 结构体的内存
+// }
 
 // 注册客户端监控航班
 void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int flight_id) {
