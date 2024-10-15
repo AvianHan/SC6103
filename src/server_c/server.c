@@ -139,7 +139,7 @@ void *handle_client(void *arg)
     if (use_at_least_once)
     {
         // At-least-once: 直接重新执行请求
-        printf("Processing new request (At-least-once): %s\n", data->buffer);
+        printf("Processing new request (At-least-once): %u\n", data->buffer);
         handleRequest(data->buffer, data->client_addr, data->sockfd, data->addr_len, conn);
 
         // 生成新的响应

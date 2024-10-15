@@ -37,7 +37,7 @@ typedef struct {
 } Flight;
 
 struct client_data{
-    char buffer[BUFFER_SIZE];
+    uint8_t buffer[BUFFER_SIZE];
     struct sockaddr_in client_addr;
     int sockfd;
     socklen_t addr_len;

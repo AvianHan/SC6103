@@ -69,25 +69,19 @@
 //     printf("Response sent to client: %s\n", response);
 // }
 
-void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, socklen_t len, MYSQL *conn) {
+void handleRequest(uint8_t *request, struct sockaddr_in cliaddr, int sockfd, socklen_t len, MYSQL *conn) {
     char response[1024];
+    printf("Request uint8_t request value: %u\n", request);
     uint8_t* buffer = (uint8_t*)request;
     size_t buffer_len = sizeof(buffer);
     size_t offset = 0;  // 用于追踪当前的读取位置
-
+    
+    printf("Request uint8_t value: %u\n", buffer);
     // Step 1: 读取请求类型的长度（4 个字节）
     uint32_t request_type_len;
-    if (buffer_len < 4) {
-        fprintf(stderr, "Buffer too short!\n");
-        return;
-    }
     request_type_len = ntohl(*(uint32_t *)(buffer + offset));  // 将大端字节序转换为主机字节序
     offset += 4;
-
-    if (offset + request_type_len > buffer_len) {
-        fprintf(stderr, "Invalid buffer length for request type!\n");
-        return;
-    }
+    printf("request_type_len uint32_t value: %u\n", request_type_len);
 
     // Step 2: 读取请求类型字符串
     char request_type[100];
