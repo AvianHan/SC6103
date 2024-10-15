@@ -33,45 +33,6 @@ ClientMonitor client_monitors[100];  // 假设最多有100个客户端监控
 int client_monitor_count = 0;
 
 extern pthread_mutex_t flight_mutex;  // 互斥锁
-// 处理客户端请求
-// void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *buffer, MYSQL *conn) {
-//     char command[20];
-//     sscanf(buffer, "%s", command);
-
-//     uint32_t flight_data_length;
-//     // 通过 unmarshall 解析出 Flight 结构体
-//     Flight* flight = unmarshal_flight((uint8_t*)(buffer + strlen(command) + 1), &flight_data_length);
-
-//     if (strcmp(command, "QUERY_FLIGHT") == 0) {
-//         // 提取航班的出发地和目的地
-//         char* source = flight->source_place;
-//         char* destination = flight->destination_place;
-        
-//         // 调用 handle_query_details 并传递数据库连接 conn
-//         handle_query_details(sockfd, client_addr, buffer, conn);
-        
-//         free(flight->source_place);  // 释放动态分配的字符串
-//         free(flight->destination_place);
-//     } else if (strcmp(command, "QUERY_FLIGHT_ID") == 0) {
-//         handle_query_details(sockfd, client_addr, buffer, conn);
-//     } else if (strcmp(command, "RESERVE") == 0) {
-//         handle_reservation(sockfd, client_addr, buffer, conn);
-//     } else if (strcmp(command, "ADD_BAGGAGE") == 0) {
-//         handle_add_baggage(sockfd, client_addr, buffer, conn);
-//     } else if(strcmp(command, "QUERY_BAGGAGE") == 0) {
-//         handle_query_baggage_availability(sockfd, client_addr, buffer, conn);
-//     } else if(strcmp(command, "MONITOR_FLIGHT") == 0) {
-//         int flight_id;
-//         sscanf(buffer, "MONITOR_FLIGHT %d", &flight_id);
-//         register_flight_monitor(sockfd, client_addr, flight_id);
-//     } else {
-//         char error_msg[BUFFER_SIZE];
-//         strcpy(error_msg, "Invalid command");
-//         sendto(sockfd, error_msg, strlen(error_msg), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-//     }
-    
-//     free(flight);  // 释放 Flight 结构体的内存
-// }
 
 // 注册客户端监控航班
 void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int flight_id) {
@@ -90,24 +51,95 @@ void register_flight_monitor(int sockfd, struct sockaddr_in *client_addr, int fl
 }
 
 // 航班监控线程函数
+// void* monitor_flights(void* arg) {
+//     int sockfd = *(int*)arg;
+
+//     while (1) {
+//         pthread_mutex_lock(&flight_mutex);
+//         // 假设航班的 seat_availability 发生变化
+//         for (int i = 0; i < client_monitor_count; i++) {
+//             int flight_id = client_monitors[i].flight_id;
+//             // 这里应该检查 flight_id 对应的航班是否有座位更新
+//             // 如果更新，向客户端发送通知
+//             char response[BUFFER_SIZE];
+//             sprintf(response, "Flight %d updated seat availability\n", flight_id);
+//             sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)&client_monitors[i].client_addr, sizeof(client_monitors[i].client_addr));
+//         }
+//         pthread_mutex_unlock(&flight_mutex);
+
+//         sleep(5);  // 每5秒检查一次航班状态
+//     }
+
+//     return NULL;
+// }
+
+
+// 航班监控线程函数
 void* monitor_flights(void* arg) {
-    int sockfd = *(int*)arg;
+
+    struct client_data *data = (struct client_data *)arg;
+    char reply[BUFFER_SIZE];
+
+    // 使用传入的数据库连接
+    //MYSQL *conn = data->conn;  // 现在可以在这个线程中使用 conn
+
+    //int sockfd = *(int*)arg;
+    MYSQL *conn = connect_db();  // 连接数据库
 
     while (1) {
         pthread_mutex_lock(&flight_mutex);
-        // 假设航班的 seat_availability 发生变化
+
+        // 遍历每个客户端监控的航班
         for (int i = 0; i < client_monitor_count; i++) {
             int flight_id = client_monitors[i].flight_id;
-            // 这里应该检查 flight_id 对应的航班是否有座位更新
-            // 如果更新，向客户端发送通知
-            char response[BUFFER_SIZE];
-            sprintf(response, "Flight %d updated seat availability\n", flight_id);
-            sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)&client_monitors[i].client_addr, sizeof(client_monitors[i].client_addr));
+
+            // 查询当前航班的座位可用性
+            char query[256];
+            snprintf(query, sizeof(query), "SELECT seat_availability FROM flights WHERE flight_id = %d", flight_id);
+            if (mysql_query(conn, query)) {
+                fprintf(stderr, "SELECT error: %s\n", mysql_error(conn));
+                continue;
+            }
+
+            MYSQL_RES *res = mysql_store_result(conn);
+            if (res == NULL) {
+                fprintf(stderr, "mysql_store_result() failed: %s\n", mysql_error(conn));
+                continue;
+            }
+
+            MYSQL_ROW row = mysql_fetch_row(res);
+            if (row) {
+                int current_seat_availability = atoi(row[0]);
+
+                // 比较当前座位可用数量是否变化
+                for (int j = 0; j < flight_status_count; j++) {
+                    if (flight_status[j].flight_id == flight_id) {
+                        if (flight_status[j].seat_availability != current_seat_availability) {
+                            flight_status[j].seat_availability = current_seat_availability;  // 更新状态
+
+                            // 通知注册监控该航班的客户端
+                            char response[BUFFER_SIZE];
+                            snprintf(response, sizeof(response), 
+                                     "Flight %d seat availability updated to %d\n", 
+                                     flight_id, current_seat_availability);
+
+                            // 将更新发送到注册的客户端
+                            sendto(data->sockfd, response, strlen(response), 0, 
+                                   (struct sockaddr *)&client_monitors[i].client_addr, 
+                                   sizeof(client_monitors[i].client_addr));
+                        }
+                    }
+                }
+            }
+
+            mysql_free_result(res);
         }
+
         pthread_mutex_unlock(&flight_mutex);
 
-        sleep(5);  // 每5秒检查一次航班状态
+        sleep(5);  // 每5秒查询一次数据库
     }
 
+    close_db(conn);  // 关闭数据库连接
     return NULL;
 }
