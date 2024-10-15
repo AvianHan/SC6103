@@ -67,13 +67,15 @@ int add_flight(int flight_id, const char *source, const char *destination, Depar
 // 航班服务头文件
 
 // Flight Service Function Declarations
-void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *source, char *destination);
+void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
 void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
-
-// void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *buffer);
 void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+// void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *buffer);
+// void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
+// void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
+// void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
 
 
 // 线程池头文件

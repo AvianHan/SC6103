@@ -29,13 +29,14 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
     } else if (strncmp(request, "query_flight_id", 15) == 0) {
         // 示例: 处理查询航班ID的逻辑
         printf("Received query_flight_id request\n");
-        strcpy(response, "Flight ID list: 123, 456, 789");
+        handle_query_flight(sockfd, &cliaddr, request, conn);
+        // strcpy(response, "Flight ID list: 123, 456, 789");
     } else if (strncmp(request, "query_flight_info", 17) == 0) {
         // 示例: 处理查询航班信息的逻辑
         printf("Received query_flight_info request\n"); 
         // 在此处查询数据库
         handle_query_details(sockfd, &cliaddr, request, conn);
-        //strcpy(response, "Flight info: Flight 123, Departure: 10:00, Seats: 100");
+        // strcpy(response, "Flight info: Flight 123, Departure: 10:00, Seats: 100");
     } else if (strncmp(request, "make_seat_reservation", 21) == 0) {
         // 示例: 处理预订座位的逻辑
         printf("Received make_seat_reservation request\n");
