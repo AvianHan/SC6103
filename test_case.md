@@ -9,6 +9,8 @@
 ![image](https://github.com/user-attachments/assets/571ea9a7-0c18-4581-bc73-632a6707f17c)
 ![image](https://github.com/user-attachments/assets/9134fd69-ab8e-452b-951b-48f957db4c8a)
 
-2. query_flight_info
+2. query_flight_info 
+flight_id=10
+![alt text](image-3.png)
 
-2. 
+3. 
