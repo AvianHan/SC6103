@@ -40,19 +40,23 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
     } else if (strncmp(request, "make_seat_reservation", 21) == 0) {
         // 示例: 处理预订座位的逻辑
         printf("Received make_seat_reservation request\n");
-        strcpy(response, "Seat reservation confirmed");
+        handle_reservation(sockfd, &cliaddr, request, conn);
+        //strcpy(response, "Seat reservation confirmed");
     } else if (strncmp(request, "query_baggage_availability", 26) == 0) {
         // 示例: 处理查询行李信息的逻辑
         printf("Received query_baggage_availability request\n");
-        strcpy(response, "Baggage availability: 50");
+        handle_query_baggage_availability(sockfd, &cliaddr, request, conn);
+        //strcpy(response, "Baggage availability: 50");
     } else if (strncmp(request, "add_baggage", 11) == 0) {
         // 示例: 处理添加行李的逻辑
         printf("Received add_baggage request\n");
-        strcpy(response, "Baggage added successfully");
+        handle_add_baggage(sockfd, &cliaddr, request, conn);
+        //strcpy(response, "Baggage added successfully");
     } else {
         // 未知命令
         printf("Unknown command received: %s\n", request);
         strcpy(response, "Unknown command");
+        sendto(sockfd, response, strlen(response), 0, (const struct sockaddr *)&cliaddr, len);
     }
 
     // 发送响应给客户端
