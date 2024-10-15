@@ -30,7 +30,10 @@ exceed:
 
 185:
 ![alt text](image-10.png)
-![Uploading image.png…]()
+![image](https://github.com/user-attachments/assets/cb3fc614-9972-47b3-b806-4693cf8d4f4b)
 ![alt text](image-13.png)
 ![alt text](image-14.png)
 ![alt text](image-15.png)
+![image](https://github.com/user-attachments/assets/335aa693-5186-4c09-a80b-ef3e14daf042)
+![Uploading image.png…]()
+
