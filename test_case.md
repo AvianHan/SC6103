@@ -27,9 +27,8 @@ exceed:
 ![alt text](image-8.png)
 ![image](https://github.com/user-attachments/assets/5c945aa2-011d-4fda-84ec-82ff1cdae0f4)
 
-166:
-![alt text](image-9.png)
-![image](https://github.com/user-attachments/assets/9f92bfb3-ec84-400f-9915-bc437d5f2cdb)
+
 185:
 ![alt text](image-10.png)
 ![Uploading image.png…]()
+![alt text](image-11.png)
