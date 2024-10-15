@@ -55,11 +55,11 @@ void handle_client_request(int sockfd, struct sockaddr_in *client_addr, char *bu
     } else if (strcmp(command, "QUERY_FLIGHT_ID") == 0) {
         handle_query_details(sockfd, client_addr, buffer, conn);
     } else if (strcmp(command, "RESERVE") == 0) {
-        handle_reservation(sockfd, client_addr, buffer);
+        handle_reservation(sockfd, client_addr, buffer, conn);
     } else if (strcmp(command, "ADD_BAGGAGE") == 0) {
-        handle_add_baggage(sockfd, client_addr, buffer);
+        handle_add_baggage(sockfd, client_addr, buffer, conn);
     } else if(strcmp(command, "QUERY_BAGGAGE") == 0) {
-        handle_query_baggage_availability(sockfd, client_addr, buffer);
+        handle_query_baggage_availability(sockfd, client_addr, buffer, conn);
     } else if(strcmp(command, "MONITOR_FLIGHT") == 0) {
         int flight_id;
         sscanf(buffer, "MONITOR_FLIGHT %d", &flight_id);

@@ -259,7 +259,7 @@ void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *reque
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID
-    sscanf(buffer, "RESERVE %d %d", &flight_id, &seats);
+    sscanf(request, "RESERVE %d %d", &flight_id, &seats);
 
     // 遍历航班数组，查找匹配的航班ID
     for (int i = 0; i < flight_count; i++) {
@@ -303,7 +303,7 @@ void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *reque
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID
-    sscanf(buffer, "ADD_BAGGAGE %d %d", &flight_id, &baggages);
+    sscanf(request, "ADD_BAGGAGE %d %d", &flight_id, &baggages);
 
      // 遍历航班数组，查找匹配的航班ID
     for (int i = 0; i < flight_count; i++) {
@@ -348,7 +348,7 @@ void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_ad
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID
-    sscanf(buffer, "QUERY_BAGGAGE %d", &flight_id);
+    sscanf(request, "QUERY_BAGGAGE %d", &flight_id);
 
     // 遍历航班数组，查找匹配的航班ID
     for (int i = 0; i < flight_count; i++) {
