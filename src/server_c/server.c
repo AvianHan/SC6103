@@ -154,7 +154,7 @@ void *handle_client(void *arg)
             printf("Duplicate request found (At-most-once), sending cached response.\n");
 
             snprintf(reply, sizeof(reply), "Response to: %s", data->buffer);
-            sendto(data->sockfd, reply, strlen(reply), 0, (struct sockaddr *)&data->client_addr, data->addr_len);
+            // sendto(data->sockfd, reply, strlen(reply), 0, (struct sockaddr *)&data->client_addr, data->addr_len);
         }
         else
         {

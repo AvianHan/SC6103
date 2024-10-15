@@ -18,7 +18,7 @@
 #include <pthread.h>
 #include "server.h"
 
-处理请求的函数
+// 处理请求的函数
 void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, socklen_t len, MYSQL *conn) {
     char response[1024];
 
@@ -53,10 +53,27 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
         handle_add_baggage(sockfd, &cliaddr, request, conn);
         //strcpy(response, "Baggage added successfully");
     } else if (strncmp(request, "follow_flight_id", 16) == 0) {
-        // 示例: 处理添加行李的逻辑
-        printf("Received follow_flight_id request\n");
-        
-        //strcpy(response, "Baggage added successfully");
+        // 示例: 处理callback
+        printf("Received follow_flight_id request\n");// 解析 follow_flight_id 请求
+        int flight_id;
+        sscanf(request, "follow_flight_id %d", &flight_id);
+        // 注册该客户端监控航班
+        printf("Received follow_flight_id request for flight_id: %d\n", flight_id);
+        register_flight_monitor(sockfd, &cliaddr, flight_id);
+
+        // 启动一个监控航班座位可用性的线程
+        pthread_t monitor_thread;
+        struct client_data *data = malloc(sizeof(struct client_data));
+        data->sockfd = sockfd;
+        data->client_addr = cliaddr;
+        data->conn = conn;  // 传入数据库连接
+
+        if (pthread_create(&monitor_thread, NULL, monitor_flights, (void *)data) != 0) {
+            perror("Failed to create monitor thread");
+        }
+        pthread_detach(monitor_thread);  // 分离线程，使其在完成后自动释放资源
+
+        strcpy(response, "Flight monitoring started.\n");
     } else {
         // 未知命令
         printf("Unknown command received: %s\n", request);
@@ -65,7 +82,6 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
     }
 
     // 发送响应给客户端
-    // sendto(sockfd, response, strlen(response), 0, (const struct sockaddr *)&cliaddr, len);
     printf("Response sent to client: %s\n", response);
 }
 
