@@ -15,7 +15,7 @@ public class UserInterface extends JFrame {
     private JTextArea outputArea;
     private JTextField inputField1, inputField2, inputField3;
     private JLabel inputPromptLabel1, inputPromptLabel2, inputPromptLabel3;
-    private JButton executeButton, testAddressButton, quitButton, queryFlightIdButton, queryFlightInfoButton, makeReservationButton, queryBaggageButton, addBaggageButton;
+    private JButton executeButton, testAddressButton, quitButton, queryFlightIdButton, queryFlightInfoButton, makeReservationButton, queryBaggageButton, addBaggageButton, followFlightIdButton;
 
     public UserInterface(Client client) {
         this.client = client;
@@ -49,6 +49,7 @@ public class UserInterface extends JFrame {
         makeReservationButton = new JButton("Make Seat Reservation");
         queryBaggageButton = new JButton("Query Baggage");
         addBaggageButton = new JButton("Add Baggage");
+        followFlightIdButton = new JButton("Follow Flight Id");
 
         JPanel inputPanel = new JPanel();
         inputPanel.setLayout(new GridLayout(3, 2));  // 将输入框和提示标签布局为 3 行 2 列
@@ -67,6 +68,7 @@ public class UserInterface extends JFrame {
         buttonPanel.add(queryBaggageButton);
         buttonPanel.add(addBaggageButton);
         buttonPanel.add(quitButton);
+        buttonPanel.add(followFlightIdButton);
 
         Container container = getContentPane();
         container.setLayout(new BorderLayout());
@@ -109,11 +111,6 @@ public class UserInterface extends JFrame {
         queryFlightIdButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                selectedOperation = "query_flight_id";  // 设置操作为查询航班ID
-//                inputPromptLabel1.setText("Source Place:");
-//                inputPromptLabel2.setText("Destination Place:");
-//                inputPromptLabel3.setVisible(false);  // 只需要两个输入
-//                inputField3.setVisible(false);
                 selectedOperation = "query_flight_id";  // 设置操作为查询航班ID
                 // 将所有输入框和标签设为可见
                 inputPromptLabel1.setVisible(true);
@@ -132,12 +129,6 @@ public class UserInterface extends JFrame {
         queryFlightInfoButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                selectedOperation = "query_flight_info";  // 设置操作为查询航班信息
-//                inputPromptLabel1.setText("Flight ID:");
-//                inputPromptLabel2.setVisible(false);  // 只需要一个输入
-//                inputPromptLabel3.setVisible(false);
-//                inputField2.setVisible(false);
-//                inputField3.setVisible(false);
                 selectedOperation = "query_flight_info";  // 设置操作为查询航班信息
                 // 将所有输入框和标签设为可见
                 inputPromptLabel1.setVisible(true);
@@ -151,15 +142,29 @@ public class UserInterface extends JFrame {
             }
         });
 
+        // 关注航班信息按钮点击事件
+        followFlightIdButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedOperation = "follow_flight_id";  // 设置操作为查询航班信息
+                // 将所有输入框和标签设为可见
+                inputPromptLabel1.setVisible(true);
+                inputPromptLabel2.setVisible(false);  // 只需要一个输入
+                inputPromptLabel3.setVisible(false);
+                inputField1.setVisible(true);
+                inputField2.setVisible(false);
+                inputField3.setVisible(false);
+
+                inputPromptLabel1.setText("Flight ID:");
+            }
+        });
+
+
+
         // 预订座位按钮点击事件
         makeReservationButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                selectedOperation = "make_seat_reservation";  // 设置操作为预订座位
-//                inputPromptLabel1.setText("Flight ID:");
-//                inputPromptLabel2.setText("Number of Seats:");
-//                inputPromptLabel3.setVisible(false);
-//                inputField3.setVisible(false);
                 selectedOperation = "make_seat_reservation";  // 设置操作为预订座位
                 // 将所有输入框和标签设为可见
                 inputPromptLabel1.setVisible(true);
@@ -178,12 +183,6 @@ public class UserInterface extends JFrame {
         queryBaggageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                selectedOperation = "query_baggage_availability";  // 设置操作为查询行李
-//                inputPromptLabel1.setText("Flight ID:");
-//                inputPromptLabel2.setVisible(false);  // 只需要一个输入
-//                inputPromptLabel3.setVisible(false);
-//                inputField2.setVisible(false);
-//                inputField3.setVisible(false);
                 selectedOperation = "query_baggage_availability";  // 设置操作为查询行李
                 // 将所有输入框和标签设为可见
                 inputPromptLabel1.setVisible(true);
@@ -201,11 +200,6 @@ public class UserInterface extends JFrame {
         addBaggageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                selectedOperation = "add_baggage";  // 设置操作为添加行李
-//                inputPromptLabel1.setText("Flight ID:");
-//                inputPromptLabel2.setText("Number of Baggages:");
-//                inputPromptLabel3.setVisible(false);
-//                inputField3.setVisible(false);
                 selectedOperation = "add_baggage";  // 设置操作为添加行李
                 // 将所有输入框和标签设为可见
                 inputPromptLabel1.setVisible(true);
@@ -234,6 +228,10 @@ public class UserInterface extends JFrame {
                         case "query_flight_info":
                             int flightId = Integer.parseInt(inputField1.getText());
                             client.queryFlightInfo(flightId);
+                            break;
+                        case "follow_flight_id":
+                            flightId = Integer.parseInt(inputField1.getText());
+                            client.followFlightId(flightId);
                             break;
                         case "make_seat_reservation":
                             flightId = Integer.parseInt(inputField1.getText());
