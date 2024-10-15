@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
     // 主循环：处理客户端请求
     while (1)
     {
-        printf("Now we are dealing with a message...\n");
+        // printf("Now we are dealing with a message...\n");
         memset(buffer, 0, BUFFER_SIZE);
 
         // 通过 select 来监控套接字可读性
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
         if (activity < 0) {
             perror("select error");
         } else if (activity == 0) {
-            printf("No activity within the timeout period.\n");
+            //printf("No activity within the timeout period.\n");
             continue;
         }
 
