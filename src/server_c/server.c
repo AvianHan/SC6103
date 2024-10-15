@@ -164,7 +164,7 @@ void *handle_client(void *arg)
     // 调用 handleRequest 函数处理接收到的请求
     // handleRequest(data->buffer, data->client_addr, data->sockfd, data->addr_len);
     printf("sending reply!\n");
-    sendto(data->sockfd, reply, strlen(reply), 0, (struct sockaddr *)&data->client_addr, data->addr_len);
+    // sendto(data->sockfd, reply, strlen(reply), 0, (struct sockaddr *)&data->client_addr, data->addr_len);
 
     // 释放动态分配的内存
     free(data);

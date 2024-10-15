@@ -27,68 +27,7 @@ const char *months[] = {
     "July", "August", "September", "October", "November", "December"
 };
 
-
-// 处理航班查询请求（通过出发地和目的地）
-// void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
-//     int found = 0;
-        
-//     // 动态分配内存给 response
-//     char *response = (char *)malloc(BUFFER_SIZE * sizeof(char));
-//     if (response == NULL) {
-//         perror("Memory allocation failed");
-//         return;
-//     }
-//     int response_size = BUFFER_SIZE;
-//     memset(response, 0, response_size);
-
-//     // 遍历航班数组，查找匹配的出发地和目的地
-//     for (int i = 0; i < flight_count; i++) {
-//         if (strcmp(flights[i].source_place, source) == 0 && strcmp(flights[i].destination_place, destination) == 0) {
-//             char flight_info[200];
-//             sprintf(flight_info, "Flight ID: %d\nBaggage Availability: %d kg\n",
-//                     flights[i].flight_id, flights[i].baggage_availability);
-
-//             // 检查 response 缓冲区是否足够大，动态扩展
-//             if (strlen(response) + strlen(flight_info) >= response_size) {
-//                 response_size *= 2;  // 扩展为原来的两倍
-//                 response = (char *)realloc(response, response_size * sizeof(char));
-//                 if (response == NULL) {
-//                     perror("Memory reallocation failed");
-//                     return;
-//                 }
-//             }
-
-//             strcat(response, flight_info);  // 将找到的航班信息附加到响应中
-//             found++;
-//         }
-//     }
-
-//     // 如果没有找到匹配的航班，返回错误消息
-//     if (!found) {
-//         strcpy(response, "No flights found.\n");
-//     }
-
-//     // 确认响应字符串长度并且以 \0 结尾
-//     size_t response_len = strlen(response);
-//     if (response[response_len - 1] != '\n') {
-//         // 如果没有换行符，手动添加换行符
-//         strcat(response, "\n");
-//     }
-
-//     // 发送响应到客户端
-//     ssize_t sent_len = sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
-//     if (sent_len < 0) {
-//         perror("Failed to send response");
-//     } else {
-//         printf("Response sent to client: %s\n", response);
-//     }
-//     printf("Response being sent to client: %s\n", response);
-
-//     // 释放动态分配的内存
-//     free(response);
-// }
-
-// 处理航班查询请求（通过出发地和目的地）
+// 处理航班查询请求（通过出发地和目的地）(已改动)
 void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
     char source[50], destination[50];
     int found = 0;
@@ -170,7 +109,7 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *requ
 }
 
 
-// 查询航班的函数，使用数据库查询航班信息
+// 查询航班的函数，使用数据库查询航班信息(已改动)
 void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
     int flight_id, found = 0;
     char query[256];
@@ -211,8 +150,8 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
                  months[atoi(row[4]) - 1],  // 通过月份数组找到月份名称
                  atoi(row[5]),               // day
                  atoi(row[3]),               // year
-                 atoi(row[7]),               // hour
-                 atoi(row[8]));              // minute
+                 atoi(row[6]),               // hour
+                 atoi(row[7]));              // minute
 
         // 格式化航班的全部信息，包括优化后的时间显示
         snprintf(response + strlen(response), sizeof(response) - strlen(response),
@@ -227,9 +166,9 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
                  row[1],  // source_place
                  row[2],  // destination_place
                  departure_time,  // 格式化后的出发时间
-                 row[9],  // airfare
-                 row[10], // seat_availability
-                 row[11]  // baggage_availability
+                 row[8],  // airfare
+                 row[9], // seat_availability
+                 row[10]  // baggage_availability
         );
 
         found = 1;
@@ -252,120 +191,312 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
 
 
 // 座位预定函数
+// void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
+//     int flight_id, seats;
+//     int found = 0;
+//     char response[BUFFER_SIZE];  // 用于存储响应内容
+//     memset(response, 0, BUFFER_SIZE);
+
+//     // 从客户端请求中提取航班ID
+//     sscanf(request, "RESERVE %d %d", &flight_id, &seats);
+
+//     // 遍历航班数组，查找匹配的航班ID
+//     for (int i = 0; i < flight_count; i++) {
+//         if (flights[i].flight_id == flight_id) {
+//             found = 1;
+//             // 检查是否有空余座位
+//             if (flights[i].seat_availability == 0){
+//                 // 如果没有空余座位，返回错误消息
+//                 strcpy(response, "Reservation failed: No seats available.\n");
+//             }
+//             else if (flights[i].seat_availability < seats) {
+//                 // 如果没有空余座位，返回错误消息
+//                 strcpy(response, "Reservation failed: No enough seats available. Reduce your reservation.\n");
+                
+//             } else {
+//                 // 预定座位，减少可用座位数量
+//                 flights[i].seat_availability -= seats;
+
+//                 // 返回预定确认消息
+//                 sprintf(response, "Reservation confirmed for Flight ID: %d\nSeats remaining: %d\n",
+//                         flights[i].flight_id,
+//                         flights[i].seat_availability);
+//             }
+//             break;  // 找到匹配的航班后退出循环
+//         }
+//     }
+
+//     // 如果没有找到匹配的航班，返回错误消息
+//     if (!found) {
+//         strcpy(response, "Flight not found.\n");
+//     }
+
+//     // 将结果发送回客户端
+//     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+// }
+
 void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
     int flight_id, seats;
-    int found = 0;
+    char query[256];
     char response[BUFFER_SIZE];  // 用于存储响应内容
     memset(response, 0, BUFFER_SIZE);
 
-    // 从客户端请求中提取航班ID
+    // 从客户端请求中提取航班ID和要预定的座位数
     sscanf(request, "RESERVE %d %d", &flight_id, &seats);
+    printf("Received reservation request: Flight ID=%d, Seats=%d\n", flight_id, seats);
 
-    // 遍历航班数组，查找匹配的航班ID
-    for (int i = 0; i < flight_count; i++) {
-        if (flights[i].flight_id == flight_id) {
-            found = 1;
-            // 检查是否有空余座位
-            if (flights[i].seat_availability == 0){
-                // 如果没有空余座位，返回错误消息
-                strcpy(response, "Reservation failed: No seats available.\n");
-            }
-            else if (flights[i].seat_availability < seats) {
-                // 如果没有空余座位，返回错误消息
-                strcpy(response, "Reservation failed: No enough seats available. Reduce your reservation.\n");
-                
-            } else {
-                // 预定座位，减少可用座位数量
-                flights[i].seat_availability -= seats;
+    // 构建SQL查询，检查航班的剩余座位数
+    snprintf(query, sizeof(query), "SELECT seat_availability FROM flights WHERE flight_id=%d", flight_id);
 
-                // 返回预定确认消息
-                sprintf(response, "Reservation confirmed for Flight ID: %d\nSeats remaining: %d\n",
-                        flights[i].flight_id,
-                        flights[i].seat_availability);
-            }
-            break;  // 找到匹配的航班后退出循环
-        }
+    // 执行SQL查询
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "SELECT error: %s\n", mysql_error(conn));
+        snprintf(response, sizeof(response), "Database query failed.\n");
+        sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+        return;
     }
 
-    // 如果没有找到匹配的航班，返回错误消息
-    if (!found) {
+    MYSQL_RES *res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "mysql_store_result() failed: %s\n", mysql_error(conn));
+        snprintf(response, sizeof(response), "Database error occurred.\n");
+        sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+        return;
+    }
+
+    MYSQL_ROW row = mysql_fetch_row(res);
+
+    if (row) {
+        int seat_availability = atoi(row[0]);  // 获取座位可用数量
+        if (seat_availability == 0) {
+            // 如果没有可用座位
+            strcpy(response, "Reservation failed: No seats available.\n");
+        } else if (seat_availability < seats) {
+            // 如果座位不够
+            strcpy(response, "Reservation failed: Not enough seats available. Reduce your reservation.\n");
+        } else {
+            // 更新座位数量
+            int new_seat_availability = seat_availability - seats;
+            snprintf(query, sizeof(query),
+                     "UPDATE flights SET seat_availability=%d WHERE flight_id=%d",
+                     new_seat_availability, flight_id);
+
+            if (mysql_query(conn, query)) {
+                fprintf(stderr, "UPDATE error: %s\n", mysql_error(conn));
+                snprintf(response, sizeof(response), "Database update failed.\n");
+            } else {
+                // 返回预定确认信息
+                snprintf(response, sizeof(response),
+                         "Reservation confirmed for Flight ID: %d\nSeats remaining: %d\n",
+                         flight_id, new_seat_availability);
+            }
+        }
+    } else {
+        // 如果没有找到匹配的航班
         strcpy(response, "Flight not found.\n");
     }
 
+    // 释放查询结果
+    mysql_free_result(res);
+
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+
+    // 输出日志
+    printf("Response sent to client: %s\n", response);
 }
+
+// void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
+//     int flight_id, baggages;
+//     int found = 0;
+//     char response[BUFFER_SIZE];  // 用于存储响应内容
+//     memset(response, 0, BUFFER_SIZE);
+
+//     // 从客户端请求中提取航班ID
+//     sscanf(request, "ADD_BAGGAGE %d %d", &flight_id, &baggages);
+
+//      // 遍历航班数组，查找匹配的航班ID
+//     for (int i = 0; i < flight_count; i++) {
+//         if (flights[i].flight_id == flight_id) {
+//             found = 1;
+//             // 检查是否有空余行李位置
+//             if (flights[i].baggage_availability == 0){
+//                 // 如果没有空余行李位置，返回错误消息
+//                 strcpy(response, "Reservation failed: No baggage acceptable.\n");
+//             }
+//             else if (flights[i].baggage_availability < baggages) {
+//                 // 如果没有空余行李位置，返回错误消息
+//                 strcpy(response, "Reservation failed: No enough place for baggage available. Reduce your reservation.\n");
+                
+//             } else {
+//                 // 预定行李位置，减少可用座位数量
+//                 flights[i].baggage_availability -= baggages;
+
+//                 // 返回预定确认消息
+//                 sprintf(response, "Reservation confirmed for Flight ID: %d\nBaggages still acceptable: %d\n",
+//                         flights[i].flight_id,
+//                         flights[i].baggage_availability);
+//             }
+//             break;  // 找到匹配的航班后退出循环
+//         }
+//     }
+
+//     // 如果没有找到匹配的航班，返回错误消息
+//     if (!found) {
+//         strcpy(response, "Flight not found.\n");
+//     }
+
+//     // 将结果发送回客户端
+//     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+// }
 
 void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
     int flight_id, baggages;
-    int found = 0;
+    char query[256];
     char response[BUFFER_SIZE];  // 用于存储响应内容
     memset(response, 0, BUFFER_SIZE);
 
-    // 从客户端请求中提取航班ID
+    // 从客户端请求中提取航班ID和行李数量
     sscanf(request, "ADD_BAGGAGE %d %d", &flight_id, &baggages);
+    printf("Received baggage reservation request: Flight ID=%d, Baggages=%d\n", flight_id, baggages);
 
-     // 遍历航班数组，查找匹配的航班ID
-    for (int i = 0; i < flight_count; i++) {
-        if (flights[i].flight_id == flight_id) {
-            found = 1;
-            // 检查是否有空余行李位置
-            if (flights[i].baggage_availability == 0){
-                // 如果没有空余行李位置，返回错误消息
-                strcpy(response, "Reservation failed: No baggage acceptable.\n");
-            }
-            else if (flights[i].baggage_availability < baggages) {
-                // 如果没有空余行李位置，返回错误消息
-                strcpy(response, "Reservation failed: No enough place for baggage available. Reduce your reservation.\n");
-                
-            } else {
-                // 预定行李位置，减少可用座位数量
-                flights[i].baggage_availability -= baggages;
+    // 构建SQL查询语句，检查航班的行李可用性
+    snprintf(query, sizeof(query), "SELECT baggage_availability FROM flights WHERE flight_id=%d", flight_id);
 
-                // 返回预定确认消息
-                sprintf(response, "Reservation confirmed for Flight ID: %d\nBaggages still acceptable: %d\n",
-                        flights[i].flight_id,
-                        flights[i].baggage_availability);
-            }
-            break;  // 找到匹配的航班后退出循环
-        }
+    // 执行SQL查询
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "SELECT error: %s\n", mysql_error(conn));
+        snprintf(response, sizeof(response), "Database query failed.\n");
+        sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+        return;
     }
 
-    // 如果没有找到匹配的航班，返回错误消息
-    if (!found) {
+    MYSQL_RES *res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "mysql_store_result() failed: %s\n", mysql_error(conn));
+        snprintf(response, sizeof(response), "Database error occurred.\n");
+        sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+        return;
+    }
+
+    MYSQL_ROW row = mysql_fetch_row(res);
+
+    if (row) {
+        int baggage_availability = atoi(row[0]);  // 获取行李可用数量
+        if (baggage_availability == 0) {
+            // 如果没有可用的行李位置
+            strcpy(response, "Baggage reservation failed: No baggage space available.\n");
+        } else if (baggage_availability < baggages) {
+            // 如果行李空间不足
+            strcpy(response, "Baggage reservation failed: Not enough space for baggage. Reduce your request.\n");
+        } else {
+            // 更新行李可用数量
+            int new_baggage_availability = baggage_availability - baggages;
+            snprintf(query, sizeof(query),
+                     "UPDATE flights SET baggage_availability=%d WHERE flight_id=%d",
+                     new_baggage_availability, flight_id);
+
+            if (mysql_query(conn, query)) {
+                fprintf(stderr, "UPDATE error: %s\n", mysql_error(conn));
+                snprintf(response, sizeof(response), "Database update failed.\n");
+            } else {
+                // 返回行李预定确认信息
+                snprintf(response, sizeof(response),
+                         "Baggage reservation confirmed for Flight ID: %d\nBaggage space remaining: %d\n",
+                         flight_id, new_baggage_availability);
+            }
+        }
+    } else {
+        // 如果没有找到匹配的航班
         strcpy(response, "Flight not found.\n");
     }
 
+    // 释放查询结果
+    mysql_free_result(res);
+
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+
+    // 输出日志
+    printf("Response sent to client: %s\n", response);
 }
+
+
+// void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
+//     int flight_id;
+//     int found = 0;
+//     char response[BUFFER_SIZE];  // 用于存储响应内容
+//     memset(response, 0, BUFFER_SIZE);
+
+//     // 从客户端请求中提取航班ID
+//     sscanf(request, "QUERY_BAGGAGE %d", &flight_id);
+
+//     // 遍历航班数组，查找匹配的航班ID
+//     for (int i = 0; i < flight_count; i++) {
+//         if (flights[i].flight_id == flight_id) {
+//             found = 1;
+//             // 返回该航班的行李可用空间
+//             sprintf(response, "Flight ID: %d\nBaggage space available: %d\n", 
+//                     flights[i].flight_id, flights[i].baggage_availability);
+//             break;
+//         }
+//     }
+
+//     // 如果没有找到匹配的航班，返回错误消息
+//     if (!found) {
+//         strcpy(response, "Flight not found.\n");
+//     }
+
+//     // 将结果发送回客户端
+//     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+// }
 
 
 void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
     int flight_id;
-    int found = 0;
+    char query[256];
     char response[BUFFER_SIZE];  // 用于存储响应内容
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID
     sscanf(request, "QUERY_BAGGAGE %d", &flight_id);
+    printf("Received query for baggage availability: Flight ID=%d\n", flight_id);
 
-    // 遍历航班数组，查找匹配的航班ID
-    for (int i = 0; i < flight_count; i++) {
-        if (flights[i].flight_id == flight_id) {
-            found = 1;
-            // 返回该航班的行李可用空间
-            sprintf(response, "Flight ID: %d\nBaggage space available: %d\n", 
-                    flights[i].flight_id, flights[i].baggage_availability);
-            break;
-        }
+    // 构建SQL查询语句，查询航班的行李可用空间
+    snprintf(query, sizeof(query), "SELECT baggage_availability FROM flights WHERE flight_id = %d", flight_id);
+
+    // 执行SQL查询
+    if (mysql_query(conn, query)) {
+        fprintf(stderr, "SELECT error: %s\n", mysql_error(conn));
+        snprintf(response, sizeof(response), "Database query failed.\n");
+        sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+        return;
     }
 
-    // 如果没有找到匹配的航班，返回错误消息
-    if (!found) {
+    MYSQL_RES *res = mysql_store_result(conn);
+    if (res == NULL) {
+        fprintf(stderr, "mysql_store_result() failed: %s\n", mysql_error(conn));
+        snprintf(response, sizeof(response), "Database error occurred.\n");
+        sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+        return;
+    }
+
+    MYSQL_ROW row = mysql_fetch_row(res);
+
+    if (row) {
+        // 获取航班行李可用空间并生成响应
+        snprintf(response, sizeof(response), "Flight ID: %d\nBaggage space available: %s\n", flight_id, row[0]);
+    } else {
+        // 如果没有找到匹配的航班，返回错误消息
         strcpy(response, "Flight not found.\n");
     }
 
+    // 释放查询结果
+    mysql_free_result(res);
+
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
+
+    // 输出日志
+    printf("Response sent to client: %s\n", response);
 }

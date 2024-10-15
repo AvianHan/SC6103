@@ -56,6 +56,6 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
     }
 
     // 发送响应给客户端
-    sendto(sockfd, response, strlen(response), 0, (const struct sockaddr *)&cliaddr, len);
+    // sendto(sockfd, response, strlen(response), 0, (const struct sockaddr *)&cliaddr, len);
     printf("Response sent to client: %s\n", response);
 }
