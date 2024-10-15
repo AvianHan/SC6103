@@ -242,7 +242,7 @@ void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *reque
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID和要预定的座位数
-    sscanf(request, "RESERVE %d %d", &flight_id, &seats);
+    sscanf(request, "make_seat_reservation %d %d", &flight_id, &seats);
     printf("Received reservation request: Flight ID=%d, Seats=%d\n", flight_id, seats);
 
     // 构建SQL查询，检查航班的剩余座位数
@@ -357,7 +357,7 @@ void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *reque
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID和行李数量
-    sscanf(request, "ADD_BAGGAGE %d %d", &flight_id, &baggages);
+    sscanf(request, "add_baggage %d %d", &flight_id, &baggages);
     printf("Received baggage reservation request: Flight ID=%d, Baggages=%d\n", flight_id, baggages);
 
     // 构建SQL查询语句，检查航班的行李可用性
@@ -459,7 +459,7 @@ void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_ad
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID
-    sscanf(request, "QUERY_BAGGAGE %d", &flight_id);
+    sscanf(request, "query_baggage_availability %d", &flight_id);
     printf("Received query for baggage availability: Flight ID=%d\n", flight_id);
 
     // 构建SQL查询语句，查询航班的行李可用空间
