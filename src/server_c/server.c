@@ -63,8 +63,6 @@ struct client_data
 
 
 // 设置套接字为非阻塞模式的函数
-
-
 void set_nonblocking(int sockfd) {
 #ifdef _WIN32
     // Windows 平台设置非阻塞模式
@@ -93,17 +91,22 @@ void store_in_history(struct sockaddr_in *client_addr, const char *request, cons
         strncpy(history[history_count].request, request, BUFFER_SIZE);
         strncpy(history[history_count].response, response, BUFFER_SIZE);
         history_count++;
-        printf("Storing request: %s with response: %s\n", request, response);
-        printf("store msg in history!\n");
     }
     else
     {
-        printf("History is full, cannot store new requests.\n");
+        // FIFO: 删除最早的记录，腾出空间
+        for (int i = 1; i < MAX_HISTORY; i++) {
+            history[i - 1] = history[i];
+        }
+        history[MAX_HISTORY - 1].client_addr = *client_addr;
+        strncpy(history[MAX_HISTORY - 1].request, request, BUFFER_SIZE);
+        strncpy(history[MAX_HISTORY - 1].response, response, BUFFER_SIZE);
     }
+    
 }
 
 // ---- 2. Filter duplicate: 用于检查请求是否已经处理过，避免重复处理 ----
-int find_in_history(struct sockaddr_in *client_addr, const char *request, char *response)
+int find_in_history(int sockfd, struct sockaddr_in *client_addr, const char *request, char *response)
 {
     for (int i = 0; i < history_count; i++)
     {
@@ -113,6 +116,8 @@ int find_in_history(struct sockaddr_in *client_addr, const char *request, char *
         {
             strcpy(response, history[i].response);
             printf("request duplicated! exit now.\n");
+            //sendto
+            sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
             return 1; // 请求已经处理过
         }
     }
@@ -143,10 +148,13 @@ void *handle_client(void *arg)
     else
     {
         // At-most-once: 检查历史记录，避免重复处理
-        if (find_in_history(&data->client_addr, data->buffer, reply))
+        if (find_in_history(data->sockfd, &data->client_addr, data->buffer, reply))
         {
             // ---- 3. Re-reply: 找到重复请求，直接返回历史响应 ----
             printf("Duplicate request found (At-most-once), sending cached response.\n");
+
+            snprintf(reply, sizeof(reply), "Response to: %s", data->buffer);
+            sendto(data->sockfd, reply, strlen(reply), 0, (struct sockaddr *)&data->client_addr, data->addr_len);
         }
         else
         {
@@ -158,14 +166,16 @@ void *handle_client(void *arg)
             snprintf(reply, sizeof(reply), "Response to: %s", data->buffer);
 
             // 将请求和响应存储到历史记录中 (Store history)
-            store_in_history(&data->client_addr, data->buffer, reply);
+            // store_in_history(&data->client_addr, data->buffer, reply);
         }
     }
     // 调用 handleRequest 函数处理接收到的请求
     // handleRequest(data->buffer, data->client_addr, data->sockfd, data->addr_len);
     printf("sending reply!\n");
-    // sendto(data->sockfd, reply, strlen(reply), 0, (struct sockaddr *)&data->client_addr, data->addr_len);
+    //发送响应给客户端（无论是新请求还是重复请求）
 
+
+    //
     // 释放动态分配的内存
     free(data);
 

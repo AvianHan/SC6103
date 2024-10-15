@@ -49,3 +49,15 @@ after
 ![image](https://github.com/user-attachments/assets/313e95dd-7cda-4e05-9bf7-ceeb28f6ed05)
 
 ![alt text](image-20.png)
+
+
+102:
+before
+![alt text](image-21.png)
+![alt text](image-22.png)
+![alt text](image-23.png)
+![alt text](image-24.png)
+![image](https://github.com/user-attachments/assets/bb44c605-ae94-43ad-a1c1-0bda3823def1)
+add 1 
+![image](https://github.com/user-attachments/assets/b00f057a-462e-4c60-a53c-77cf9adafa25)
+
