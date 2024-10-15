@@ -90,7 +90,8 @@ void thread_pool_destroy();
 // 服务器文件
 void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, socklen_t len, MYSQL *conn);
 void store_in_history(struct sockaddr_in* client_addr, const char* request, const char* response);
-int find_in_history(struct sockaddr_in* client_addr, const char* request, char* response);
+// int find_in_history(struct sockaddr_in* client_addr, const char* request, char* response);
+int find_in_history(int sockfd, struct sockaddr_in *client_addr, const char *request, char *response);
 void* handle_client(void* arg);
 
 

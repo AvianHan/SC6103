@@ -178,7 +178,7 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
     if (!found) {
         snprintf(response, sizeof(response), "Flight not found.\n");
     }
-
+    store_in_history(client_addr, request, response);
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 
@@ -298,7 +298,7 @@ void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *reque
 
     // 释放查询结果
     mysql_free_result(res);
-
+    store_in_history(client_addr, request, response);
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 
@@ -413,7 +413,9 @@ void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *reque
 
     // 释放查询结果
     mysql_free_result(res);
-
+    //store_in_history(sockfd, request, response);
+    //store_in_history(&client_addr, request, response);
+    store_in_history(client_addr, request, response);
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 
@@ -493,7 +495,7 @@ void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_ad
 
     // 释放查询结果
     mysql_free_result(res);
-
+    store_in_history(client_addr, request, response);
     // 将结果发送回客户端
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 
