@@ -37,7 +37,7 @@ typedef struct {
 } Flight;
 
 struct client_data{
-    uint8_t buffer[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE];
     struct sockaddr_in client_addr;
     int sockfd;
     socklen_t addr_len;
@@ -67,17 +67,17 @@ int add_flight(int flight_id, const char *source, const char *destination, Depar
 // 航班服务头文件
 
 // Flight Service Function Declarations
-// void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
-// void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
-// void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
-// void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
-// void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
+void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
+void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
+void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
+void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
+void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn);
 
-void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, char *source, char *destination);
-void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id);
-void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id, int seats);
-void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id, int baggages);
-void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id);
+// void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, char *source, char *destination);
+// void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id);
+// void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id, int seats);
+// void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id, int baggages);
+// void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id);
 
 // 线程池头文件
 void thread_pool_init(int num_threads);

@@ -28,12 +28,12 @@ const char *months[] = {
 };
 
 // 处理航班查询请求（通过出发地和目的地）(已改动)
-void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, char *source, char *destination) {
-    //char source[50], destination[50];
+void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
+    char source[50], destination[50];
     int found = 0;
 
     // 从请求中提取出发地和目的地
-    // sscanf(request, "query_flight_id %s %s", source, destination);
+    sscanf(request, "query_flight_id %s %s", source, destination);
     printf("Received query: source=%s, destination=%s\n", source, destination);
 
     // 构建SQL查询语句
@@ -110,15 +110,15 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *requ
 
 
 // 查询航班的函数，使用数据库查询航班信息(已改动)
-void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id) {
-    //int flight_id;
+void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
+    int flight_id;
     int found = 0;
     char query[256];
     char response[BUFFER_SIZE];  // 用于存储响应内容
     memset(response, 0, BUFFER_SIZE);  // 确保缓冲区清空
 
     // 从客户端请求中提取航班ID
-    // sscanf(request, "query_flight_info %d", &flight_id);
+    sscanf(request, "query_flight_info %d", &flight_id);
     printf("Received query: flight_id=%d\n", flight_id);
 
     // 构建SQL查询语句
@@ -190,14 +190,14 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
     printf("Response sent to client: %s\n", response);
 }
 
-void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id, int seats) {
-    //int flight_id, seats;
+void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
+    int flight_id, seats;
     char query[256];
     char response[BUFFER_SIZE];  // 用于存储响应内容
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID和要预定的座位数
-    // sscanf(request, "make_seat_reservation %d %d", &flight_id, &seats);
+    sscanf(request, "make_seat_reservation %d %d", &flight_id, &seats);
     printf("Received reservation request: Flight ID=%d, Seats=%d\n", flight_id, seats);
 
     // 构建SQL查询，检查航班的剩余座位数
@@ -262,14 +262,14 @@ void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *reque
 }
 
 
-void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id, int baggages) {
-    //int flight_id, baggages;
+void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
+    int flight_id, baggages;
     char query[256];
     char response[BUFFER_SIZE];  // 用于存储响应内容
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID和行李数量
-    //sscanf(request, "add_baggage %d %d", &flight_id, &baggages);
+    sscanf(request, "add_baggage %d %d", &flight_id, &baggages);
     printf("Received baggage reservation request: Flight ID=%d, Baggages=%d\n", flight_id, baggages);
 
     // 构建SQL查询语句，检查航班的行李可用性
@@ -335,14 +335,14 @@ void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *reque
     printf("Response sent to client: %s\n", response);
 }
 
-void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn, int flight_id) {
-    //int flight_id;
+void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_addr, char *request, MYSQL *conn) {
+    int flight_id;
     char query[256];
     char response[BUFFER_SIZE];  // 用于存储响应内容
     memset(response, 0, BUFFER_SIZE);
 
     // 从客户端请求中提取航班ID
-    // sscanf(request, "query_baggage_availability %d", &flight_id);
+    sscanf(request, "query_baggage_availability %d", &flight_id);
     printf("Received query for baggage availability: Flight ID=%d\n", flight_id);
 
     // 构建SQL查询语句，查询航班的行李可用空间
