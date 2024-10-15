@@ -31,4 +31,3 @@ exceed:
 185:
 ![alt text](image-10.png)
 ![Uploading image.png…]()
-![alt text](image-11.png)
