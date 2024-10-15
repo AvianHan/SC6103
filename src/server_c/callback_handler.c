@@ -73,6 +73,7 @@ void* monitor_flights(void* arg) {
             // 查询当前航班的座位可用性
             char query[256];
             snprintf(query, sizeof(query), "SELECT seat_availability FROM flights WHERE flight_id = %d", flight_id);
+            printf("LOOP I:exec SELECT seat_availability FROM flights WHERE flight_id = %d\n", flight_id);
             if (mysql_query(conn, query)) {
                 fprintf(stderr, "SELECT error: %s\n", mysql_error(conn));
                 continue;
@@ -87,13 +88,14 @@ void* monitor_flights(void* arg) {
             MYSQL_ROW row = mysql_fetch_row(res);
             if (row) {
                 int current_seat_availability = atoi(row[0]);
+                printf("LOOP J: now current_seat_availability is %d", current_seat_availability);
 
                 // 比较当前座位可用数量是否变化
                 for (int j = 0; j < client_monitor_count; j++) {
                     if (client_monitors[j].flight_id == flight_id) {
                         if (client_monitors[j].seat_availability != current_seat_availability) {
                             client_monitors[j].seat_availability = current_seat_availability;  // 更新状态
-
+                            printf("seats avail changed\n");
                             // 通知注册监控该航班的客户端
                             char response[BUFFER_SIZE];
                             snprintf(response, sizeof(response), 
@@ -113,7 +115,7 @@ void* monitor_flights(void* arg) {
         }
 
         pthread_mutex_unlock(&flight_mutex);
-        printf("check in flight seat availability");
+        //printf("check in flight seat availability\n");
         sleep(5);  // 每5秒查询一次数据库
     }
 
