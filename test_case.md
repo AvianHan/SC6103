@@ -73,6 +73,10 @@ server:
 ![alt text](image-33.png)
 ![alt text](image-34.png)
 
+![alt text](image-35.png)
+![alt text](image-37.png)
+![alt text](image-36.png)
+
 client:
 ![alt text](image-29.png)
 ![alt text](image-30.png)
