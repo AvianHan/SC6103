@@ -1,6 +1,5 @@
 package src;
 
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,42 +7,44 @@ import java.awt.event.ActionListener;
 
 public class UserInterface extends JFrame {
 
-    private Client client;  // Client 类用于与服务器交互
-    private String selectedOperation;  // 记录当前选择的操作
+    private Client client;  // Reference to the Client class, used to communicate with the server
+    private String selectedOperation;  // Stores the current selected operation
 
-    // GUI 组件
-    private JTextArea outputArea;
-    private JTextField inputField1, inputField2, inputField3;
-    private JLabel inputPromptLabel1, inputPromptLabel2, inputPromptLabel3;
-    private JButton executeButton, testAddressButton, quitButton, queryFlightIdButton, queryFlightInfoButton, makeReservationButton, queryBaggageButton, addBaggageButton, followFlightIdButton;
+    // GUI components
+    private JTextArea outputArea;  // Area to display output
+    private JTextField inputField1, inputField2, inputField3;  // Input fields for user inputs
+    private JLabel inputPromptLabel1, inputPromptLabel2, inputPromptLabel3;  // Labels for input fields
+    private JButton executeButton, testAddressButton, quitButton, queryFlightIdButton, queryFlightInfoButton, 
+                    makeReservationButton, queryBaggageButton, addBaggageButton, followFlightIdButton;  // Buttons for different actions
 
+    // Constructor for initializing the GUI and setting the client reference
     public UserInterface(Client client) {
         this.client = client;
-        this.client.setUserInterface(this);  // 设置 Client 中的回调界面
+        this.client.setUserInterface(this);  // Set this UI as the callback for the client
 
-        setTitle("Flight Information System");
-        setSize(600, 500);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        initGUI();
+        setTitle("Flight Information System");  // Set the title of the window
+        setSize(600, 500);  // Set the size of the window
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Set the default close operation
+        initGUI();  // Initialize the GUI components
     }
 
-    // 初始化 GUI
+    // Initialize the GUI components
     private void initGUI() {
-        outputArea = new JTextArea();
-        outputArea.setEditable(false);
+        outputArea = new JTextArea();  // Text area to display the output
+        outputArea.setEditable(false);  // Make the text area non-editable
 
-        inputField1 = new JTextField(10);
-        inputField2 = new JTextField(10);
-        inputField3 = new JTextField(10);
+        inputField1 = new JTextField(10);  // Input field 1 with a width of 10 characters
+        inputField2 = new JTextField(10);  // Input field 2 with a width of 10 characters
+        inputField3 = new JTextField(10);  // Input field 3 with a width of 10 characters
 
-        inputPromptLabel1 = new JLabel("Input 1: ");
-        inputPromptLabel2 = new JLabel("Input 2: ");
-        inputPromptLabel3 = new JLabel("Input 3: ");
+        inputPromptLabel1 = new JLabel("Input 1: ");  // Label for the first input field
+        inputPromptLabel2 = new JLabel("Input 2: ");  // Label for the second input field
+        inputPromptLabel3 = new JLabel("Input 3: ");  // Label for the third input field
 
-        executeButton = new JButton("Execute");  // 新增执行按钮
-        quitButton = new JButton("Quit");
+        executeButton = new JButton("Execute");  // Button to execute the selected operation
+        quitButton = new JButton("Quit");  // Button to quit the application
 
-        // 操作按钮
+        // Initialize buttons for different actions (query flight, baggage, etc.)
         queryFlightIdButton = new JButton("Query Flight ID");
         queryFlightInfoButton = new JButton("Query Flight Info");
         makeReservationButton = new JButton("Make Seat Reservation");
@@ -51,8 +52,9 @@ public class UserInterface extends JFrame {
         addBaggageButton = new JButton("Add Baggage");
         followFlightIdButton = new JButton("Follow Flight Id");
 
+        // Input panel to hold the input fields and their corresponding labels
         JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new GridLayout(3, 2));  // 将输入框和提示标签布局为 3 行 2 列
+        inputPanel.setLayout(new GridLayout(3, 2));  // Set a 3x2 grid layout for the input fields and labels
         inputPanel.add(inputPromptLabel1);
         inputPanel.add(inputField1);
         inputPanel.add(inputPromptLabel2);
@@ -60,224 +62,130 @@ public class UserInterface extends JFrame {
         inputPanel.add(inputPromptLabel3);
         inputPanel.add(inputField3);
 
+        // Button panel to hold action buttons
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(3, 2, 10, 10));  // 使用 GridLayout 将按钮布局到中间部分
-        buttonPanel.add(queryFlightIdButton);
-        buttonPanel.add(queryFlightInfoButton);
-        buttonPanel.add(makeReservationButton);
-        buttonPanel.add(queryBaggageButton);
-        buttonPanel.add(addBaggageButton);
-        buttonPanel.add(quitButton);
-        buttonPanel.add(followFlightIdButton);
+        buttonPanel.setLayout(new GridLayout(3, 2, 10, 10));  // Set a 3x2 grid layout with 10px spacing
+        buttonPanel.add(queryFlightIdButton);  // Add Query Flight ID button
+        buttonPanel.add(queryFlightInfoButton);  // Add Query Flight Info button
+        buttonPanel.add(makeReservationButton);  // Add Make Seat Reservation button
+        buttonPanel.add(queryBaggageButton);  // Add Query Baggage button
+        buttonPanel.add(addBaggageButton);  // Add Add Baggage button
+        buttonPanel.add(quitButton);  // Add Quit button
+        buttonPanel.add(followFlightIdButton);  // Add Follow Flight ID button
 
+        // Set up the main container and layout
         Container container = getContentPane();
-        container.setLayout(new BorderLayout());
-        container.add(new JScrollPane(outputArea), BorderLayout.CENTER);
-        container.add(inputPanel, BorderLayout.NORTH);  // 输入框放在顶部
-        container.add(buttonPanel, BorderLayout.SOUTH);  // 按钮放在底部
-        container.add(executeButton, BorderLayout.EAST); // 执行按钮放置在右侧
+        container.setLayout(new BorderLayout());  // Use BorderLayout for the main layout
+        container.add(new JScrollPane(outputArea), BorderLayout.CENTER);  // Add output area in the center with scroll support
+        container.add(inputPanel, BorderLayout.NORTH);  // Add input fields panel at the top
+        container.add(buttonPanel, BorderLayout.SOUTH);  // Add button panel at the bottom
+        container.add(executeButton, BorderLayout.EAST); // Add the execute button on the right
 
-        // 添加测试服务器地址按钮
+        // Add button to test server address
         testAddressButton = new JButton("Test Server Address");
         testAddressButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String serverAddress = client.getServerAddress();  // 获取服务器地址
-                outputArea.append("Server Address: " + serverAddress + "\n");
+                String serverAddress = client.getServerAddress();  // Fetch server address
+                outputArea.append("Server Address: " + serverAddress + "\n");  // Display server address in the output area
             }
         });
-        buttonPanel.add(testAddressButton);
+        buttonPanel.add(testAddressButton);  // Add the Test Server Address button to the panel
 
-
-        // 添加一个按钮用于测试连接
+        // Add a button to test the connection to the server
         JButton testConnectionButton = new JButton("Test Connection");
 
         testConnectionButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String serverAddress = client.getServerAddress();  // 获取服务器地址
-                // outputArea.append("Server Address: " + serverAddress + "\n");
-
-                client.testConnection();  // 调用客户端的测试连接方法
-                outputArea.append("testing connection with server: " + serverAddress + "\n");
+                String serverAddress = client.getServerAddress();  // Fetch server address
+                client.testConnection();  // Test connection with the server
+                outputArea.append("testing connection with server: " + serverAddress + "\n");  // Display test connection result
             }
         });
 
-        // 添加按钮到面板
+        // Add Test Connection button to the panel
         buttonPanel.add(testConnectionButton);
 
-
-        // 查询航班ID按钮点击事件
+        // Action listener for Query Flight ID button
         queryFlightIdButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                selectedOperation = "query_flight_id";  // 设置操作为查询航班ID
-                // 将所有输入框和标签设为可见
+                selectedOperation = "query_flight_id";  // Set selected operation as query flight ID
+                // Make the appropriate input fields and labels visible
                 inputPromptLabel1.setVisible(true);
                 inputPromptLabel2.setVisible(true);
-                inputPromptLabel3.setVisible(false);  // 只需要两个输入
+                inputPromptLabel3.setVisible(false);  // Only need two inputs
                 inputField1.setVisible(true);
                 inputField2.setVisible(true);
                 inputField3.setVisible(false);
 
-                inputPromptLabel1.setText("Source Place:");
+                inputPromptLabel1.setText("Source Place:");  // Update label text
                 inputPromptLabel2.setText("Destination Place:");
             }
         });
 
-        // 查询航班信息按钮点击事件
+        // Action listener for Query Flight Info button
         queryFlightInfoButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                selectedOperation = "query_flight_info";  // 设置操作为查询航班信息
-                // 将所有输入框和标签设为可见
+                selectedOperation = "query_flight_info";  // Set selected operation as query flight info
+                // Make only the first input field visible (no need for more than one input)
                 inputPromptLabel1.setVisible(true);
-                inputPromptLabel2.setVisible(false);  // 只需要一个输入
+                inputPromptLabel2.setVisible(false);  
                 inputPromptLabel3.setVisible(false);
                 inputField1.setVisible(true);
                 inputField2.setVisible(false);
                 inputField3.setVisible(false);
 
-                inputPromptLabel1.setText("Flight ID:");
+                inputPromptLabel1.setText("Flight ID:");  // Update label text for flight ID
             }
         });
 
-        // 关注航班信息按钮点击事件
+        // Action listener for Follow Flight ID button
         followFlightIdButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                selectedOperation = "follow_flight_id";  // 设置操作为查询航班信息
-                // 将所有输入框和标签设为可见
+                selectedOperation = "follow_flight_id";  // Set selected operation as follow flight info
+                // Make only the first input field visible (no need for more than one input)
                 inputPromptLabel1.setVisible(true);
-                inputPromptLabel2.setVisible(false);  // 只需要一个输入
+                inputPromptLabel2.setVisible(false);  
                 inputPromptLabel3.setVisible(false);
                 inputField1.setVisible(true);
                 inputField2.setVisible(false);
                 inputField3.setVisible(false);
 
-                inputPromptLabel1.setText("Flight ID:");
+                inputPromptLabel1.setText("Flight ID:");  // Update label text for flight ID
             }
         });
 
-
-
-        // 预订座位按钮点击事件
+        // Action listener for Make Seat Reservation button
         makeReservationButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                selectedOperation = "make_seat_reservation";  // 设置操作为预订座位
-                // 将所有输入框和标签设为可见
+                selectedOperation = "make_seat_reservation";  // Set selected operation as seat reservation
+                // Make two input fields visible
                 inputPromptLabel1.setVisible(true);
                 inputPromptLabel2.setVisible(true);
-                inputPromptLabel3.setVisible(false);  // 只需要两个输入
+                inputPromptLabel3.setVisible(false);  // Only two inputs are needed
                 inputField1.setVisible(true);
                 inputField2.setVisible(true);
                 inputField3.setVisible(false);
 
-                inputPromptLabel1.setText("Flight ID:");
-                inputPromptLabel2.setText("Number of Seats:");
+                inputPromptLabel1.setText("Flight ID:");  // Update label text for flight ID
+                inputPromptLabel2.setText("Number of Seats:");  // Update label text for number of seats
             }
         });
 
-        // 查询行李按钮点击事件
+        // Action listener for Query Baggage button
         queryBaggageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                selectedOperation = "query_baggage_availability";  // 设置操作为查询行李
-                // 将所有输入框和标签设为可见
+                selectedOperation = "query_baggage_availability";  // Set selected operation as query baggage
+                // Make only the first input field visible
                 inputPromptLabel1.setVisible(true);
-                inputPromptLabel2.setVisible(false);  // 只需要一个输入
+                inputPromptLabel2.setVisible(false);  
                 inputPromptLabel3.setVisible(false);
                 inputField1.setVisible(true);
                 inputField2.setVisible(false);
-                inputField3.setVisible(false);
-
-                inputPromptLabel1.setText("Flight ID:");
-            }
-        });
-
-        // 添加行李按钮点击事件
-        addBaggageButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectedOperation = "add_baggage";  // 设置操作为添加行李
-                // 将所有输入框和标签设为可见
-                inputPromptLabel1.setVisible(true);
-                inputPromptLabel2.setVisible(true);
-                inputPromptLabel3.setVisible(false);  // 只需要两个输入
-                inputField1.setVisible(true);
-                inputField2.setVisible(true);
-                inputField3.setVisible(false);
-
-                inputPromptLabel1.setText("Flight ID:");
-                inputPromptLabel2.setText("Number of Baggages:");
-            }
-        });
-
-        // 执行按钮点击事件，根据选择的操作执行不同的客户端方法
-        executeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    switch (selectedOperation) {
-                        case "query_flight_id":
-                            String sourcePlace = inputField1.getText();
-                            String destinationPlace = inputField2.getText();
-                            client.queryFlightId(sourcePlace, destinationPlace);
-                            break;
-                        case "query_flight_info":
-                            int flightId = Integer.parseInt(inputField1.getText());
-                            client.queryFlightInfo(flightId);
-                            break;
-                        case "follow_flight_id":
-                            flightId = Integer.parseInt(inputField1.getText());
-                            client.followFlightId(flightId);
-                            break;
-                        case "make_seat_reservation":
-                            flightId = Integer.parseInt(inputField1.getText());
-                            int numSeats = Integer.parseInt(inputField2.getText());
-                            client.makeSeatReservation(flightId, numSeats);
-                            break;
-                        case "query_baggage_availability":
-                            flightId = Integer.parseInt(inputField1.getText());
-                            client.queryBaggageAvailability(flightId);
-                            break;
-                        case "add_baggage":
-                            flightId = Integer.parseInt(inputField1.getText());
-                            int numBaggages = Integer.parseInt(inputField2.getText());
-                            client.addBaggage(flightId, numBaggages);
-                            break;
-                        default:
-                            outputArea.append("No operation selected or invalid input.\n");
-                    }
-                } catch (NumberFormatException ex) {
-                    outputArea.append("Invalid input: " + ex.getMessage() + "\n");
-                }
-            }
-        });
-
-        // 退出按钮点击事件
-        quitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);  // 退出程序
-            }
-        });
-    }
-
-    // 显示服务器的响应
-    public void displayResponse(String response) {
-        outputArea.append(response + "\n");
-    }
-
-    public static void main(String[] args) {
-        // 创建 Client 实例（用于与服务器通信）
-        Client client = new Client();
-
-        // 创建并显示 UserInterface
-        SwingUtilities.invokeLater(() -> {
-            UserInterface ui = new UserInterface(client);
-            ui.setVisible(true);
-        });
-    }
-}
+                inputField3.setVisible(false

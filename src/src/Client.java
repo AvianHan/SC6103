@@ -5,161 +5,128 @@ import java.net.*;
 
 public class Client {
 
-    private DatagramSocket socket;
-    private InetAddress serverAddress;
-    private int serverPort = 8080;  // 假设服务器端口是8080
-    private UserInterface userInterface;
+    private DatagramSocket socket;  // UDP socket for communication between client and server
+    private InetAddress serverAddress;  // Server address
+    private int serverPort = 8080;  // Server port
+    private UserInterface userInterface;  // Reference to the UserInterface for displaying server responses
 
-    // 构造函数，初始化与服务器的连接
+    // Constructor to initialize the connection to the server
     public Client() {
         try {
-            socket = new DatagramSocket();
-            serverAddress = InetAddress.getByName("172.20.10.10");  // 假设服务器
-            startListeningToServer();
+            socket = new DatagramSocket();  // Create a new UDP socket
+            serverAddress = InetAddress.getByName("172.20.10.10");  // Set the server IP address
+            startListeningToServer();  // Start the server listening thread to continuously listen for messages from the server
         } catch (SocketException | UnknownHostException e) {
-            e.printStackTrace();
+            e.printStackTrace();  // Handle potential socket or host exceptions
         }
     }
 
-    // 设置 UserInterface 的引用，用于回调显示服务器的响应
+    // Set the reference to the UserInterface, used to display server responses via callback
     public void setUserInterface(UserInterface userInterface) {
         this.userInterface = userInterface;
     }
 
-    // 测试与服务器的连接
+    // Test the connection to the server
     public void testConnection() {
-        String request = "test_connection";  // 简单的测试连接请求
+        String request = "test_connection";  // Simple connection test request
         System.out.println("testing connection to server");
-        sendRequest(request);  // 发送测试请求到服务器
+        sendRequest(request);  // Send test request to the server
         System.out.println("already sent the request to server");
     }
 
-    // 查询航班ID
+    // Query flight ID by sending a request based on the source and destination places
     public void queryFlightId(String sourcePlace, String destinationPlace) {
-
-        String request = "query_flight_id " + sourcePlace + " " + destinationPlace;
-        sendRequest(request);  // 发送请求到服务器
-
-
-//        sendRequest("query_flight_id", sourcePlace, destinationPlace);
-
+        String request = "query_flight_id " + sourcePlace + " " + destinationPlace;  // Construct the request
+        sendRequest(request);  // Send the request to the server
     }
 
-    // 查询航班信息
+    // Query flight information by sending a request based on the flight ID
     public void queryFlightInfo(int flightId) {
-
-        String request = "query_flight_info " + flightId;
-        sendRequest(request);
-
-//        sendRequest("query_flight_info", flightId);
-
+        String request = "query_flight_info " + flightId;  // Construct the request
+        sendRequest(request);  // Send the request to the server
     }
 
-    // 预订座位
+    // Make seat reservation by sending a request based on the flight ID and number of seats
     public void makeSeatReservation(int flightId, int numSeats) {
-
-        String request = "make_seat_reservation " + flightId + " " + numSeats;
-        sendRequest(request);
-
-//        sendRequest("make_seat_reservation", flightId, numSeats);
-
+        String request = "make_seat_reservation " + flightId + " " + numSeats;  // Construct the request
+        sendRequest(request);  // Send the request to the server
     }
 
-    // 查询行李信息
+    // Query baggage availability by sending a request based on the flight ID
     public void queryBaggageAvailability(int flightId) {
-
-        String request = "query_baggage_availability " + flightId;
-        sendRequest(request);
-
-//        sendRequest("query_baggage_availability", flightId);
-
+        String request = "query_baggage_availability " + flightId;  // Construct the request
+        sendRequest(request);  // Send the request to the server
     }
 
-    // 添加行李
+    // Add baggage by sending a request based on the flight ID and number of baggages
     public void addBaggage(int flightId, int numBaggages) {
-
-        String request = "add_baggage " + flightId + " " + numBaggages;
-        sendRequest(request);
-
-//        sendRequest("add_baggage", flightId, numBaggages);
-
+        String request = "add_baggage " + flightId + " " + numBaggages;  // Construct the request
+        sendRequest(request);  // Send the request to the server
     }
 
-    // 关注航班
+    // Follow flight by sending a request based on the flight ID to continuously get flight updates
     public void followFlightId(int flightId) {
-
-        String request = "follow_flight_id " + flightId;
-        sendRequest(request);
-
-//        sendRequest("follow_flight_info", flightId);
-
+        String request = "follow_flight_id " + flightId;  // Construct the request
+        sendRequest(request);  // Send the request to the server
     }
 
-
-    // 返回服务器地址
+    // Return the server address
     public String getServerAddress() {
         System.out.println("getting server address");
         if (serverAddress != null) {
-            System.out.println("Server address: " + serverAddress.getHostAddress());
-            return serverAddress.getHostAddress();
+            System.out.println("Server address: " + serverAddress.getHostAddress());  // Output the server's IP address
+            return serverAddress.getHostAddress();  // Return the server's IP address
         } else {
-            System.out.println("Server address not found!");
-            return "Server address not found!";
+            System.out.println("Server address not found!");  // Output an error message if the server address is null
+            return "Server address not found!";  // Return an error message
         }
     }
 
-
-    // 发送请求到服务器
+    // Send request to the server
     private void sendRequest(String request) {
         try {
-            byte[] requestData = request.getBytes();
-            DatagramPacket packet = new DatagramPacket(requestData, requestData.length, serverAddress, serverPort);
-            System.out.println("Sending request: " + request);
-            socket.send(packet);
-
-            // 启动线程接收服务器响应
-//            new Thread(new ResponseListener()).start();
-            System.out.println("sendRequest done");
+            byte[] requestData = request.getBytes();  // Convert the request string into a byte array
+            DatagramPacket packet = new DatagramPacket(requestData, requestData.length, serverAddress, serverPort);  // Construct the UDP packet
+            System.out.println("Sending request: " + request);  // Output the request being sent
+            socket.send(packet);  // Send the packet to the server via the UDP socket
+            System.out.println("sendRequest done");  // Output that the request has been sent
         } catch (IOException e) {
             if (userInterface != null) {
-                userInterface.displayResponse("Error sending request: " + e.getMessage());
+                userInterface.displayResponse("Error sending request: " + e.getMessage());  // If sending fails, display an error message
             }
-            System.out.println("Error sending request: " + e.getMessage());
+            System.out.println("Error sending request: " + e.getMessage());  // Output the error message
         }
     }
 
-
-    // 启动服务器消息监听线程
+    // Start the thread that listens for messages from the server
     public void startListeningToServer() {
-        new Thread(new ResponseListener()).start();
+        new Thread(new ResponseListener()).start();  // Create and start a thread to listen for server responses
     }
 
-    // 监听服务器响应
+    // Listen for server responses
     private class ResponseListener implements Runnable {
         @Override
         public void run() {
             try {
-                // 设置socket超时时间
-                socket.setSoTimeout(60000);  // 超时时间为60秒
-
-                // 持续监听服务器的响应
-                while (true) {
+                socket.setSoTimeout(60000);  // Set the UDP socket timeout to 60 seconds
+                while (true) {  // Enter an infinite loop to continuously listen for server responses
                     try {
-                        byte[] buffer = new byte[1024];
-                        DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
+                        byte[] buffer = new byte[1024];  // Create a buffer to store the server response data
+                        DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);  // Create a packet to receive the server response
                         System.out.println("Waiting for server response...");
-                        socket.receive(responsePacket);  // 接收服务器的响应
+                        socket.receive(responsePacket);  // Receive the response from the server via the UDP socket
 
-                        // 解析服务器的响应
+                        // Convert the received byte data into a string
                         String response = new String(responsePacket.getData(), 0, responsePacket.getLength());
-                        System.out.println("Received response from server: " + response);
+                        System.out.println("Received response from server: " + response);  // Output the received response
 
-                        // 将响应结果显示在用户界面上
+                        // If the user interface exists, display the response on the interface
                         if (userInterface != null) {
                             userInterface.displayResponse("Response: " + response);
                         }
 
                     } catch (SocketTimeoutException e) {
+                        // Handle timeout, and continue waiting for a new response
                         System.out.println("Request timed out: No response from server within the timeout period.");
                         if (userInterface != null) {
                             userInterface.displayResponse("Request timed out: No response from server.");
@@ -167,6 +134,7 @@ public class Client {
                     }
                 }
             } catch (IOException e) {
+                // If an IO exception occurs, display the error message
                 if (userInterface != null) {
                     userInterface.displayResponse("Error receiving response: " + e.getMessage());
                 }
@@ -174,5 +142,4 @@ public class Client {
             }
         }
     }
-
 }
