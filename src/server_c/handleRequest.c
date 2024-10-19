@@ -90,7 +90,8 @@ void handleRequest(char *request, struct sockaddr_in cliaddr, int sockfd, sockle
     }
 
     // Log the response sent to the client
-    printf("Response sent to client: %s\n", response);
+    // printf("Response sent to client: %s\n", response);
+    printf("Response sent to client.\n");
 }
 
 

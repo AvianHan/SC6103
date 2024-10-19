@@ -105,7 +105,8 @@ void handle_query_flight(int sockfd, struct sockaddr_in *client_addr, char *requ
         // Handle potential errors in sending the response
         perror("Failed to send response");
     } else {
-        printf("Response sent to client: %s\n", response);  // Print log message
+        printf("Response sent to client.\n");
+        // Print log message
     }
 
     // Free dynamically allocated memory and the query result
@@ -196,7 +197,7 @@ void handle_query_details(int sockfd, struct sockaddr_in *client_addr, char *req
     mysql_free_result(res);
 
     // Log the response
-    printf("Response sent to client: %s\n", response);
+    printf("Response sent to client.\n");
 }
 
 // Function to handle seat reservation requests
@@ -273,7 +274,7 @@ void handle_reservation(int sockfd, struct sockaddr_in *client_addr, char *reque
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 
     // Log the response
-    printf("Response sent to client: %s\n", response);
+    printf("Response sent to client.\n");
 }
 
 // Function to handle baggage addition requests
@@ -350,7 +351,7 @@ void handle_add_baggage(int sockfd, struct sockaddr_in *client_addr, char *reque
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 
     // Log the response
-    printf("Response sent to client: %s\n", response);
+    printf("Response sent to client.\n");
 }
 
 // Function to handle baggage availability queries
@@ -403,6 +404,6 @@ void handle_query_baggage_availability(int sockfd, struct sockaddr_in *client_ad
     sendto(sockfd, response, strlen(response), 0, (struct sockaddr *)client_addr, sizeof(*client_addr));
 
     // Log the response
-    printf("Response sent to client: %s\n", response);
+    printf("Response sent to client.\n");
 }
 
